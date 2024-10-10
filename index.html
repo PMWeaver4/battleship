@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Battleship is the title and it is styled via the stylesheet -->
+    <title>Battleship</title>
+    <link href="style/style.css" rel="stylesheet"/>
+  </head>
+  <body>
+    
+    <div class="container">
+
+      <header>Welcome to Battleship!</header>
+      <!-- we're using javascript to code this badboy -->
+        
+          <script src="./scripts/index.js" defer></script>
+          <div id = "menu">
+            <p>menu</p>
+            <label for="Grid Size">Choose a grid:</label>
+            <select id="grid">
+                <option value="20">default</option>
+                <option value="10">10x10</option>
+                <option value="12">12x12</option>
+                <option value="16">16x16</option>
+                <option value="20">20x20</option>
+            </select>
+            <button id="lockGridButton" onclick="lockGrid()">Lock Grid Size</button>
+       
+    <p id="selectedGrid">Selected: Default</p>
+
+    <label for="Number of Teams">Choose the number of Teams:</label>
+    <select id="numberOfTeams">
+        <option value="2">default</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+    </select>
+    <button id="lockTeamButton" onclick="lockTeams()">Lock the number of teams.</button>
+    <p id="selectedNumberOfTeams">Selected: Default 2</p>
+          </div>
+        
+        <!-- Javascript builds the table -->
+        <div id="myDynamicTable"></div>
+      
+    </div>
+    </body>
+</html>
