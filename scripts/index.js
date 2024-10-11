@@ -21,6 +21,9 @@ function lockTeams() {
 
   // Optional: Show a message or take further actions after locking
   alert(`Number of teams set to ${numberOfTeams}.`);
+
+  // Generate input fields for team names
+  //next steps: add a team name input field, create team objects that include ships, etc.
 }
 
 function addTable() {

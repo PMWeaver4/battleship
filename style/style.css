@@ -1,119 +1,51 @@
 body{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+
     /* Stylize */
     background-color: white;
     text-decoration-color: blueviolet;
-    /* I dig this background-image, but it's too much, so further down - in the container class - I lighten it up so that it's easier on the  eye*/
-    /* background-image: url(../Jeopardy_title.jpg); */
+
     background-attachment: fixed;
     
 }
-.container{
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    background-color: rgb(255 255 255 / 30%);
-    backdrop-filter: opacity(60%);
-}
 
-.landing_img {
-    display: flex;
-    height: 200PX;
-}
-
-.player_turn, .entry{
-    /* margin: 1em; */
-    font-size: 2em;
-}
-
-a{
-    text-decoration: none;
-}
-
-button{
-    margin: 0.5em;
-    width: 80px;
-}
-
-.play_button {
-    padding: 1rem;
-    font-size: large;
-}
 
 header {
     font-size: 4em;
+              /* Text color */
+    padding: 15px;             /* Padding around header */
+    text-align: center;         /* Center text */
+}
+
+.container {
+    display: flex;              /* Use Flexbox for layout */
+    height: calc(100vh - 60px); /* Full height minus header height */
+}
+
+#menu {
+    width: 250px;              /* Fixed width for the menu */
+    background-color: #f0f0f0; /* Background color for the menu */
+    padding: 10px;             /* Padding around menu items */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
 }
 
 #myDynamicTable {
-    width: auto;
-    background-color: orange;
-    border: 3px double black;
+    flex-grow: 1;              /* Allow the table to take remaining space */
+    padding: 20px;             /* Optional padding */
+    overflow: auto;            /* Allow scrolling if content overflows */
 }
 
-#myDynamicTable > table {
-    margin: 0 auto;
-}
-
-#myDynamicTable tr {
-    /* display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; */
-    width: 80%;   
-}
-#myDynamicTable td, th{
-    padding: 10px;   
-}
-
-.column_header {
-    background-color: lightgrey;
-    padding: 1em;
-}
-
-.entry {
-    padding: 1em;
-}
-
-.guess_pass {
-    display: flex;
-    justify-content:space-between;
-}
-
-.player_score {
-    width: 75%;
-    display: flex;
-    justify-content: space-between;
-}
-
-.next_round, .play_button{
-    width: auto;
-}
-
-.buttonbox{
-    display: flex;
-    justify-content: right;
-    width: 70%;    
-}
-
-.question_display {
-    width: 70%;
-    color: black;
-    background-color: white;
-    opacity: .75;
-    text-wrap: balance;
-    display: flex;
-    justify-content: center;
-}
+table {
+    border-collapse: collapse; /* Make table borders collapse */
+    width: 100%; /* Table takes full width of its container */
+  }
+  
+  th, td {
+    padding: 10px; /* Space inside cells */
+    text-align: center; /* Center text */
+  }
 
 
-.container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    align-items: center;
-    justify-content: space-between;
-}
+
 
 footer {
     display: flex;
@@ -127,12 +59,6 @@ footer {
     bottom: 10%;
 }
 
-#menu {
-    position: absolute;
-    left: 50px;
-    border: solid;
-
-}
 
 .quadrant-1 {
     background-color: lightgray; /* Color for Quadrant 1 */
