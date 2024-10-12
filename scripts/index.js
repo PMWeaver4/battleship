@@ -1,5 +1,16 @@
 let grid = 21;
-let numberOfTeams = 1;
+let numberOfTeams = 2;
+let gridLocked,
+  teamLocked = false;
+
+const colors = [
+  "#FF5733",
+  "#33FF57",
+  "#3357FF",
+  "#F1C40F",
+  "#8E44AD",
+  "#E74C3C",
+];
 
 function lockGrid() {
   const lockButton = document.getElementById("lockGridButton");
@@ -10,6 +21,8 @@ function lockGrid() {
 
   // Optional: Show a message or take further actions after locking
   alert(`Grid size locked to ${grid - 1}x${grid - 1}.`);
+  gridLocked = true;
+  nameTeams();
 }
 
 function lockTeams() {
@@ -21,9 +34,63 @@ function lockTeams() {
 
   // Optional: Show a message or take further actions after locking
   alert(`Number of teams set to ${numberOfTeams}.`);
+  teamLocked = true;
+  nameTeams();
 
   // Generate input fields for team names
-  //next steps: add a team name input field, create team objects that include ships, etc.
+  nameTeams(numberOfTeams);
+}
+
+function nameTeams(numberofTeams) {
+  if (teamLocked && gridLocked) {
+    alert("time to name the teams");
+    const container = document.getElementById("nameTeams");
+    container.innerHTML = ""; // Clear existing inputs
+
+    for (let i = 0; i < numberOfTeams; i++) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = `Team ${i + 1} Name`;
+      input.className = "team-name";
+      input.id = `teamName${i + 1}`;
+      input.style.backgroundColor = colors[i % colors.length]; // Set the background color
+      container.appendChild(input);
+    }
+    // Create the finalize button only if it doesn't exist
+    let finalizeButton = document.getElementById("finalizeTeamsButton");
+    if (!finalizeButton) {
+      finalizeButton = document.createElement("button");
+      finalizeButton.id = "finalizeTeamsButton";
+      finalizeButton.textContent = "Finalize Team Names";
+      container.appendChild(finalizeButton);
+
+      // Add event listener for the finalize button
+      finalizeButton.addEventListener("click", function () {
+        const teams = createTeams(numberOfTeams);
+        console.log(teams); // Now teams will have names populated from input fields
+      });
+    }
+  }
+}
+
+function createTeams(numberOfTeams) {
+  const teamsArray = [];
+
+  for (i = 1; i <= numberOfTeams; i++) {
+    let team = {
+      id: "team" + i,
+      name: document.getElementById(`teamName${i}`).value, // Get the name from the input
+      color: colors[(i - 1) % colors.length],
+      PTBoat: [],
+      Submarine: [],
+      Cruiser: [],
+      Destroyer: [],
+      Battleship: [],
+      AircraftCarrier: [],
+    };
+    teamsArray.push(team);
+  }
+  return teamsArray;
 }
 
 function addTable() {
