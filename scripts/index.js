@@ -223,6 +223,45 @@ function arrangeBoats(numberOfShips) {
       console.log(teamsArray[i]);
     }
   }
+  addGhostShip();
+}
+
+function addGhostShip() {
+  const ghostshipLength = 3;
+  let validPlacement = false;
+  const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
+
+  while (!validPlacement) {
+    let row,
+      col = 0;
+    let direction = coinFlip();
+
+    if (direction === "Horizontal") {
+      row = Math.floor(Math.random() * (grid - 1)) + 1;
+      col = Math.floor(Math.random() * (grid - ghostshipLength - 1)) + 1;
+    } else {
+      // Vertical
+      row = Math.floor(Math.random() * (grid - ghostshipLength - 1)) + 1;
+      col = Math.floor(Math.random() * (grid - 1)) + 1;
+    }
+
+    if (!checkForConflict(row, col, ghostshipLength, direction, boatTypes)) {
+      validPlacement = true; // Found a valid placement
+      if (direction === "Horizontal") {
+        for (let j = 0; j < ghostshipLength; j++) {
+          changeCellColor(row, col + j, "white"); // Change to a different color for visibility
+        }
+      } else {
+        // Vertical
+        for (let j = 0; j < ghostshipLength; j++) {
+          changeCellColor(row + j, col, "white");
+        }
+      }
+      console.log(
+        `Ghostship placed at direction: ${direction}, column: ${col}, row: ${row}`
+      );
+    }
+  }
 }
 
 //check quadrant limitation...(same while loop)
