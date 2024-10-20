@@ -27,9 +27,13 @@ const arrayOfBoats = [
 function lockGrid() {
   const lockButton = document.getElementById("lockGridButton");
   const gridSizeInput = document.getElementById("grid");
+  const gridSizeLabel = document.getElementById("gridSizeLabel");
 
   lockButton.disabled = true; // Disable the lock button
   gridSizeInput.disabled = true; // Disable the grid size input
+  lockButton.style.display = "none"; // Hide the lock button
+  gridSizeInput.style.display = "none"; // Hide the grid input
+  gridSizeLabel.style.display = "none";
 
   gridLocked = true;
   nameTeams();
@@ -38,9 +42,13 @@ function lockGrid() {
 function lockTeams() {
   const lockButton = document.getElementById("lockTeamButton");
   const teamSizeInput = document.getElementById("numberOfTeams");
+  const teamSizeLabel = document.getElementById("numberOfTeamsLabel");
 
   lockButton.disabled = true; // Disable the lock button
   teamSizeInput.disabled = true; // Disable the grid size input
+  lockButton.style.display = "none"; // Hide the lock button
+  teamSizeInput.style.display = "none"; // Hide the grid input
+  teamSizeLabel.style.display = "none";
 
   // Optional: Show a message or take further actions after locking
   teamLocked = true;
@@ -55,6 +63,8 @@ function nameTeams(numberofTeams) {
     const container = document.getElementById("nameTeams");
     container.innerHTML = ""; // Clear existing inputs
 
+    const inputs = []; // Store inputs to hide later
+
     for (let i = 0; i < numberOfTeams; i++) {
       const input = document.createElement("input");
       input.type = "text";
@@ -63,10 +73,11 @@ function nameTeams(numberofTeams) {
       input.id = `teamName${i + 1}`;
       input.style.backgroundColor = colors[i % colors.length]; // Set the background color
       container.appendChild(input);
+      inputs.push(input); // Add input to the array
     }
-    // Create the finalize button only if it doesn't exist
 
-    finalizeButton = document.createElement("button");
+    // Create the finalize button
+    const finalizeButton = document.createElement("button");
     finalizeButton.id = "finalizeTeamsButton";
     finalizeButton.textContent = "Finalize Team Names";
     container.appendChild(finalizeButton);
@@ -76,9 +87,54 @@ function nameTeams(numberofTeams) {
       const teams = createTeams(numberOfTeams);
       console.log(teams); // Now teams will have names populated from input fields
       finalizeButton.disabled = true;
-      arrangeBoats();
+      finalizeButton.style.display = "none";
+
+      // Hide the input fields
+      inputs.forEach((input) => {
+        input.style.display = "none";
+      });
+
+      chooseShips(); // Proceed to choose ships
     });
   }
+}
+
+function chooseShips() {
+  const container = document.getElementById("numberOfShips");
+  let numberOfShips = 3;
+  container.innerHTML = ""; // Clear existing inputs
+  finalizeButton = document.createElement("button");
+  finalizeButton.id = "finalizeShipsButton";
+  finalizeButton.textContent = "Finalize Number of Ships";
+  container.appendChild(finalizeButton);
+
+  // Create a select element
+  const selectElement = document.createElement("select");
+
+  // Populate the dropdown with numbers from 2 to 6
+  for (let i = 2; i <= 6; i++) {
+    const option = document.createElement("option");
+    option.value = i; // Set the value to the number
+    option.textContent = i; // Set the displayed text to the number
+    selectElement.appendChild(option); // Add option to the select
+  }
+
+  // Add an event listener
+  selectElement.addEventListener("change", function () {
+    numberOfShips = this.value; // Log the selected value
+  });
+
+  // Append the select element to the dropdown container
+  container.appendChild(selectElement);
+
+  // Add event listener for the finalize button
+  finalizeButton.addEventListener("click", function () {
+    finalizeButton.disabled = true;
+    selectElement.disabled = true;
+    finalizeButton.style.display = "none";
+    selectElement.style.display = "none";
+    arrangeBoats(numberOfShips);
+  });
 }
 
 function createTeams(numberOfTeams) {
@@ -117,10 +173,12 @@ function createTeams(numberOfTeams) {
   return teamsArray;
 }
 
-function arrangeBoats() {
+function arrangeBoats(numberOfShips) {
   for (let i = 0; i < numberOfTeams; i++) {
     // Array of boat types
-    const boatTypes = ["PTBoat", "Submarine", "Cruiser"];
+    console.log(`the number of ships is ${numberOfShips}`);
+    // Limit the boat types based on the number of ships chosen
+    const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
 
     for (const boatType of boatTypes) {
       let boatLength = teamsArray[i][boatType].length; // Get the length for the current boat
@@ -167,11 +225,10 @@ function arrangeBoats() {
   }
 }
 
-//add length number of coordinates
-//add a for loop of boats
-//push coordinates to team object
-//check if coordinates clash..(while loop)
 //check quadrant limitation...(same while loop)
+//add a ghost ship
+//add the team filter
+//allow for number of boat limit -
 
 function coinFlip() {
   return Math.random() < 0.5 ? "Horizontal" : "Vertical";
@@ -238,16 +295,16 @@ function addTable() {
       if (i == 0 && j == 0) {
         th.appendChild(document.createTextNode(""));
         tr.appendChild(th);
-        th.style.backgroundColor = "rgb(152, 37, 156)";
+        th.style.backgroundColor = "rgb(169, 169, 169)";
       } else if (i == 0) {
         th.appendChild(document.createTextNode(j));
         tr.appendChild(th);
-        th.style.backgroundColor = "rgb(152, 37, 156)";
+        th.style.backgroundColor = "rgb(169, 169, 169)";
       } else if (j == 0) {
         letter = String.fromCharCode(i + 64);
         td.appendChild(document.createTextNode(`${letter}`));
         tr.appendChild(td);
-        td.style.backgroundColor = "rgb(152, 37, 156)";
+        td.style.backgroundColor = "rgb(169, 169, 169)";
       } else {
         td.appendChild(document.createTextNode(`${letter}${j}`));
         tr.appendChild(td);
@@ -286,7 +343,7 @@ document.getElementById("grid").addEventListener("change", function () {
   grid = selectedValue + 1;
   document.getElementById(
     "selectedGrid"
-  ).textContent = `Selected: ${selectedValue}`;
+  ).textContent = `${selectedValue} x ${selectedValue} board`;
 
   // Add the table with the new grid size
   gridTable = addTable(); // Update the grid table with the new size
@@ -298,7 +355,7 @@ document
     numberOfTeams = selectedValue;
     document.getElementById(
       "selectedNumberOfTeams"
-    ).textContent = `Selected: ${selectedValue}`;
+    ).textContent = `${selectedValue} teams`;
   });
 
 gridTable = addTable();
