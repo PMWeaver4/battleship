@@ -5,6 +5,7 @@ let gridLocked,
 let gridTable; //global variable to store table
 
 const teamsArray = [];
+const ghostshipCoord = [];
 const colors = [
   "#FF5733", // Red-Orange
   "#33FF57", // Green
@@ -224,6 +225,7 @@ function arrangeBoats(numberOfShips) {
     }
   }
   addGhostShip();
+  displayTeamFilter();
 }
 
 function addGhostShip() {
@@ -247,14 +249,17 @@ function addGhostShip() {
 
     if (!checkForConflict(row, col, ghostshipLength, direction, boatTypes)) {
       validPlacement = true; // Found a valid placement
+      let ghostshipCoord = [];
       if (direction === "Horizontal") {
         for (let j = 0; j < ghostshipLength; j++) {
           changeCellColor(row, col + j, "white"); // Change to a different color for visibility
+          ghostshipCoord.push([row, col + j]);
         }
       } else {
         // Vertical
         for (let j = 0; j < ghostshipLength; j++) {
           changeCellColor(row + j, col, "white");
+          ghostshipCoord.push([row, col + j]);
         }
       }
       console.log(
@@ -264,10 +269,58 @@ function addGhostShip() {
   }
 }
 
-//check quadrant limitation...(same while loop)
-//add a ghost ship
-//add the team filter
-//allow for number of boat limit -
+function displayTeamFilter() {
+  console.log("display team filter");
+  const container = document.getElementById("teamFilter");
+  container.innerHTML = ""; // Clear previous content
+
+  // Create a select element
+  const selectTeam = document.createElement("select");
+
+  // Populate the dropdown with teams
+  for (let i = 0; i < numberOfTeams; i++) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = teamsArray[i].name;
+    selectTeam.appendChild(option);
+  }
+
+  // Add an event listener
+  selectTeam.addEventListener("change", function () {
+    const selectedTeam = this.value;
+    addTable();
+    colorSelectedTeam(selectedTeam);
+  });
+
+  // Append the select element to the container
+  container.appendChild(selectTeam);
+}
+
+function colorSelectedTeam(selectedTeam) {
+  // Get the color of the selected team
+  const teamColor = teamsArray[selectedTeam].color;
+
+  // Loop through the boat types for the selected team
+  for (const boatType in teamsArray[selectedTeam]) {
+    const boat = teamsArray[selectedTeam][boatType];
+
+    // Check if coordinates exist and are an array
+    if (Array.isArray(boat.coordinates)) {
+      const coordinates = boat.coordinates;
+
+      // Loop through the coordinates for each boat
+      for (const coord of coordinates) {
+        const row = coord[0]; // Get the row
+        const col = coord[1]; // Get the column
+
+        // Color the cell
+        if (gridTable.rows[row] && gridTable.rows[row].cells[col]) {
+          gridTable.rows[row].cells[col].style.backgroundColor = teamColor;
+        }
+      }
+    }
+  }
+}
 
 function coinFlip() {
   return Math.random() < 0.5 ? "Horizontal" : "Vertical";
