@@ -274,6 +274,11 @@ function displayTeamFilter() {
   const container = document.getElementById("teamFilter");
   container.innerHTML = ""; // Clear previous content
 
+  // Create label for filter
+  const selectTeamLabel = document.createElement("label");
+  selectTeamLabel.textContent = "Team Filter";
+  container.appendChild(selectTeamLabel);
+
   // Create a select element
   const selectTeam = document.createElement("select");
 
@@ -285,15 +290,49 @@ function displayTeamFilter() {
     selectTeam.appendChild(option);
   }
 
+  // Create a display area for ship coordinates
+  const coordinatesDisplay = document.createElement("div");
+  coordinatesDisplay.id = "shipCoordinates";
+  container.appendChild(coordinatesDisplay);
+
   // Add an event listener
   selectTeam.addEventListener("change", function () {
     const selectedTeam = this.value;
     addTable();
     colorSelectedTeam(selectedTeam);
+    displayShipCoordinates(selectedTeam); // Show ship coordinates for selected team
   });
 
   // Append the select element to the container
   container.appendChild(selectTeam);
+}
+
+function displayShipCoordinates(selectedTeam) {
+  const coordinatesDisplay = document.getElementById("shipCoordinates");
+  coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
+
+  const team = teamsArray[selectedTeam];
+
+  // Loop through each ship type and display its coordinates
+  for (const boatType in team) {
+    if (
+      team.hasOwnProperty(boatType) &&
+      Array.isArray(team[boatType].coordinates)
+    ) {
+      const coordinates = team[boatType].coordinates;
+
+      if (coordinates.length > 0) {
+        const coordinatesText = `${boatType}: ${coordinates
+          .map(
+            (coord) => `(${String.fromCharCode(coord[0] + 65)}, ${coord[1]})`
+          )
+          .join(", ")}`;
+        const paragraph = document.createElement("p");
+        paragraph.textContent = coordinatesText; // Set the text content
+        coordinatesDisplay.appendChild(paragraph); // Append to the display area
+      }
+    }
+  }
 }
 
 function colorSelectedTeam(selectedTeam) {
