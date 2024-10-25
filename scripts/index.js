@@ -1,8 +1,10 @@
 let grid = 21;
 let numberOfTeams = 2;
 let gridLocked,
-  teamLocked = false;
+  teamLocked,
+  gameplay = false;
 let gridTable; //global variable to store table
+let teamTurn = 0;
 
 const teamsArray = [];
 const ghostshipCoord = [];
@@ -249,7 +251,6 @@ function addGhostShip() {
 
     if (!checkForConflict(row, col, ghostshipLength, direction, boatTypes)) {
       validPlacement = true; // Found a valid placement
-      let ghostshipCoord = [];
       if (direction === "Horizontal") {
         for (let j = 0; j < ghostshipLength; j++) {
           changeCellColor(row, col + j, "white"); // Change to a different color for visibility
@@ -270,7 +271,6 @@ function addGhostShip() {
 }
 
 function displayTeamFilter() {
-  console.log("display team filter");
   const container = document.getElementById("teamFilter");
   container.innerHTML = ""; // Clear previous content
 
@@ -282,6 +282,17 @@ function displayTeamFilter() {
   // Create a select element
   const selectTeam = document.createElement("select");
 
+  // Create and add "All" option
+  const allOption = document.createElement("option");
+  allOption.value = "all"; // or any value you prefer
+  allOption.textContent = "All";
+  selectTeam.appendChild(allOption);
+  // Create and add "All" option
+  const ghostOption = document.createElement("option");
+  ghostOption.value = "ghostShip"; // or any value you prefer
+  ghostOption.textContent = "Ghost Ship";
+  selectTeam.appendChild(ghostOption);
+
   // Populate the dropdown with teams
   for (let i = 0; i < numberOfTeams; i++) {
     const option = document.createElement("option");
@@ -290,46 +301,86 @@ function displayTeamFilter() {
     selectTeam.appendChild(option);
   }
 
+  // Add an event listener
+  selectTeam.addEventListener("change", function () {
+    const selectedTeam = this.value;
+    if (selectedTeam == "all") {
+      addTable();
+      const coordinatesDisplay = document.getElementById("shipCoordinates");
+      coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
+      for (i = 0; i < numberOfTeams; i++) {
+        colorSelectedTeam(i);
+      }
+
+      ghostshipCoord.forEach((coord) => {
+        changeCellColor(coord[0], coord[1], "white"); // Adjust the color for visibility
+      });
+    } else if (selectedTeam == "ghostShip") {
+      const coordinatesDisplay = document.getElementById("shipCoordinates");
+      coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
+      addTable();
+      ghostshipCoord.forEach((coord) => {
+        changeCellColor(coord[0], coord[1], "white"); // Adjust the color for visibility
+      });
+      displayShipCoordinates(selectedTeam);
+    } else {
+      addTable();
+      colorSelectedTeam(selectedTeam);
+      displayShipCoordinates(selectedTeam); // Show ship coordinates for selected team
+    }
+  });
   // Create a display area for ship coordinates
   const coordinatesDisplay = document.createElement("div");
   coordinatesDisplay.id = "shipCoordinates";
   container.appendChild(coordinatesDisplay);
 
-  // Add an event listener
-  selectTeam.addEventListener("change", function () {
-    const selectedTeam = this.value;
-    addTable();
-    colorSelectedTeam(selectedTeam);
-    displayShipCoordinates(selectedTeam); // Show ship coordinates for selected team
-  });
-
   // Append the select element to the container
   container.appendChild(selectTeam);
+
+  //add a gameplay button
+  const gameButton = document.getElementById("gameButton");
+  const startGame = document.createElement("button");
+  startGame.id = "startGame";
+  startGame.textContent = "Begin the Game";
+  gameButton.appendChild(startGame);
+  gameButton.addEventListener("click", game);
 }
 
 function displayShipCoordinates(selectedTeam) {
   const coordinatesDisplay = document.getElementById("shipCoordinates");
   coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
+  if (selectedTeam == "ghostShip") {
+    const coordinates = ghostshipCoord;
+    console.log(coordinates);
+    if (coordinates.length > 0) {
+      const coordinatesText = `Ghost Ship: ${coordinates
+        .map((coord) => `(${String.fromCharCode(coord[0] + 64)}, ${coord[1]})`)
+        .join(", ")}`;
+      const paragraph = document.createElement("p");
+      paragraph.textContent = coordinatesText; // Set the text content
+      coordinatesDisplay.appendChild(paragraph); // Append to the display area
+    }
+  } else {
+    const team = teamsArray[selectedTeam];
 
-  const team = teamsArray[selectedTeam];
+    // Loop through each ship type and display its coordinates
+    for (const boatType in team) {
+      if (
+        team.hasOwnProperty(boatType) &&
+        Array.isArray(team[boatType].coordinates)
+      ) {
+        const coordinates = team[boatType].coordinates;
 
-  // Loop through each ship type and display its coordinates
-  for (const boatType in team) {
-    if (
-      team.hasOwnProperty(boatType) &&
-      Array.isArray(team[boatType].coordinates)
-    ) {
-      const coordinates = team[boatType].coordinates;
-
-      if (coordinates.length > 0) {
-        const coordinatesText = `${boatType}: ${coordinates
-          .map(
-            (coord) => `(${String.fromCharCode(coord[0] + 65)}, ${coord[1]})`
-          )
-          .join(", ")}`;
-        const paragraph = document.createElement("p");
-        paragraph.textContent = coordinatesText; // Set the text content
-        coordinatesDisplay.appendChild(paragraph); // Append to the display area
+        if (coordinates.length > 0) {
+          const coordinatesText = `${boatType}: ${coordinates
+            .map(
+              (coord) => `(${String.fromCharCode(coord[0] + 64)}, ${coord[1]})`
+            )
+            .join(", ")}`;
+          const paragraph = document.createElement("p");
+          paragraph.textContent = coordinatesText; // Set the text content
+          coordinatesDisplay.appendChild(paragraph); // Append to the display area
+        }
       }
     }
   }
@@ -366,7 +417,6 @@ function coinFlip() {
 }
 
 function changeCellColor(row, col, color) {
-  console.log(row, col, color);
   const cell = gridTable.rows[row].cells[col];
   cell.style.backgroundColor = color;
 }
@@ -490,3 +540,14 @@ document
   });
 
 gridTable = addTable();
+
+function game() {
+  gameplay = true;
+  console.log("game has started");
+  const menu = document.getElementById("menu");
+  menu.innerHTML = "";
+  addTable();
+  const action = document.createElement("p");
+  action.textContent = `${teamsArray[teamTurn].name} pick a target!`;
+  menu.appendChild(action);
+}
