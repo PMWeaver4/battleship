@@ -548,6 +548,12 @@ function game() {
   menu.innerHTML = "";
   addTable();
   const action = document.createElement("p");
-  action.textContent = `${teamsArray[teamTurn].name} pick a target!`;
+  action.textContent = `Team ${teamsArray[teamTurn].name} pick a target!`;
   menu.appendChild(action);
+  const input = document.createElement("input");
+  menu.appendChild(input);
+  const button = document.createElement("button");
+  button.textContent = "Fire!";
+  menu.appendChild(button);
+  //add event listener, add function to analyze hit or miss
 }
