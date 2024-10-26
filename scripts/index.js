@@ -545,15 +545,90 @@ function game() {
   gameplay = true;
   console.log("game has started");
   const menu = document.getElementById("menu");
-  menu.innerHTML = "";
-  addTable();
+  menu.innerHTML = ""; // Clear previous menu content
+
+  addTable(); // Function to add the game table
+
   const action = document.createElement("p");
-  action.textContent = `Team ${teamsArray[teamTurn].name} pick a target!`;
+  action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
   menu.appendChild(action);
+
   const input = document.createElement("input");
+  input.type = "text"; // Set input type to text
+  input.maxLength = 3; // Limit input to three characters
+  input.placeholder = "Enter target (e.g., A1)";
   menu.appendChild(input);
+
   const button = document.createElement("button");
   button.textContent = "Fire!";
   menu.appendChild(button);
-  //add event listener, add function to analyze hit or miss
+
+  // Create fire results div
+  const fireResults = document.createElement("div");
+  fireResults.id = "fireResults";
+  menu.appendChild(fireResults);
+
+  // Add event listener to the button
+  button.addEventListener("click", function () {
+    const target = input.value.toUpperCase(); // Convert input to uppercase for consistency
+    if (target.length >= 2 && target.length <= 3) {
+      analyzeHitOrMiss(target); // Call your function to analyze the hit or miss
+      teamTurn < numberOfTeams - 1 ? teamTurn++ : (teamTurn = 0);
+      action.innerHTML = "";
+      action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
+
+      input.value = ""; // Clear the input after submission
+    } else {
+      alert("Please enter exactly a letter and a number (e.g., A1).");
+    }
+  });
+}
+
+function analyzeHitOrMiss(target) {
+  const letter = target.charAt(0);
+  const number = parseInt(target.slice(1), 10);
+  const row = letter.charCodeAt(0) - "A".charCodeAt(0) + 1;
+  const column = number;
+
+  let hit = false;
+
+  // Check through each team's ships
+  for (const team of teamsArray) {
+    for (const boatType in team) {
+      const coordinates = team[boatType].coordinates;
+
+      // Ensure coordinates is an array before iterating
+      if (Array.isArray(coordinates)) {
+        for (const coord of coordinates) {
+          if (coord[0] === row && coord[1] === column) {
+            hit = true; // A hit is found
+            break;
+          }
+        }
+      }
+      if (hit) break; // Break out if hit is found
+    }
+    if (hit) break; // Break out if hit is found
+  }
+
+  // Change cell color based on hit or miss
+  if (hit) {
+    changeCellColor(row, column, "red"); // Color the cell red for a hit
+    const fireResults = document.getElementById("fireResults");
+    fireResults.innerHTML = "";
+    const message = document.createElement("p");
+    message.textContent = `${target} was a HIT!`;
+    fireResults.appendChild(message);
+  } else {
+    changeCellColor(row, column, "blue"); // Color the cell blue for a miss
+    const fireResults = document.getElementById("fireResults");
+    fireResults.innerHTML = "";
+    const message = document.createElement("p");
+    message.textContent = `${target} was a Miss.`;
+    fireResults.appendChild(message);
+  }
+
+  console.log(
+    `Row: ${row}, Column: ${column}, Result: ${hit ? "Hit" : "Miss"}`
+  );
 }
