@@ -583,6 +583,21 @@ function game() {
       alert("Please enter exactly a letter and a number (e.g., A1).");
     }
   });
+
+  //create some space between buttons
+  const spacer = document.createElement("div");
+  spacer.style.height = "100px"; // Adjust height for the desired spacing
+  menu.appendChild(spacer);
+
+  // Add the game over button
+  const gameOverButton = document.createElement("button");
+  gameOverButton.textContent = "end the game";
+  menu.appendChild(gameOverButton);
+
+  //add event listener for game end
+  gameOverButton.addEventListener("click", function () {
+    console.log("game over, man");
+  });
 }
 
 function analyzeHitOrMiss(target) {
