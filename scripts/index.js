@@ -612,7 +612,7 @@ function analyzeHitOrMiss(target) {
     let hit = false;
     let sunkMsg = "";
 
-    // Check through each team's ships
+    // Check through each team's ships.....don't forget the ghost ship!!!
     for (const team of teamsArray) {
       for (const boatType in team) {
         const coordinates = team[boatType].coordinates;
@@ -655,6 +655,7 @@ function analyzeHitOrMiss(target) {
       const message = document.createElement("p");
       message.textContent = `${target} was a Miss.`;
       fireResults.appendChild(message);
+      teamTurn < numberOfTeams - 1 ? teamTurn++ : (teamTurn = 0);
     }
 
     console.log(
@@ -668,3 +669,11 @@ function checkIfSunk(team, boatType) {
   const ship = team[boatType];
   return ship.hitCount >= ship.length;
 }
+
+//to do list
+/*
+make grid selections unique (can't choose the same spot twice)
+make analyzehitormiss include ghost ship
+make quadrant limitation in placing ships
+make endgame button do something: disable buttons, and display score
+*/
