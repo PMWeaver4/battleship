@@ -1,8 +1,9 @@
 let grid = 21;
 let numberOfTeams = 2;
-let gridLocked,
-  teamLocked,
-  gameplay = false;
+let numberOfShips = 2;
+let gridLocked = false;
+let teamLocked = false;
+let gameplay = false;
 let gridTable; //global variable to store table
 let teamTurn = 0;
 
@@ -39,7 +40,6 @@ function lockGrid() {
   gridSizeLabel.style.display = "none";
 
   gridLocked = true;
-  nameTeams();
 }
 
 function lockTeams() {
@@ -53,15 +53,12 @@ function lockTeams() {
   teamSizeInput.style.display = "none"; // Hide the grid input
   teamSizeLabel.style.display = "none";
 
-  // Optional: Show a message or take further actions after locking
   teamLocked = true;
-  nameTeams();
-
   // Generate input fields for team names
   nameTeams(numberOfTeams);
 }
 
-function nameTeams(numberofTeams) {
+function nameTeams(numberOfTeams) {
   if (teamLocked && gridLocked) {
     const container = document.getElementById("nameTeams");
     container.innerHTML = ""; // Clear existing inputs
@@ -104,7 +101,6 @@ function nameTeams(numberofTeams) {
 
 function chooseShips() {
   const container = document.getElementById("numberOfShips");
-  let numberOfShips = 3;
   container.innerHTML = ""; // Clear existing inputs
   finalizeButton = document.createElement("button");
   finalizeButton.id = "finalizeShipsButton";
@@ -141,34 +137,40 @@ function chooseShips() {
 }
 
 function createTeams(numberOfTeams) {
-  for (i = 1; i <= numberOfTeams; i++) {
+  for (let i = 1; i <= numberOfTeams; i++) {
     let team = {
       id: "team" + i,
-      name: document.getElementById(`teamName${i}`).value, // Get the name from the input
+      name: document.getElementById(`teamName${i}`).value,
       color: colors[(i - 1) % colors.length],
       PTBoat: {
         coordinates: [],
         length: 2,
+        hitCount: 0,
       },
       Submarine: {
         coordinates: [],
         length: 3,
+        hitCount: 0,
       },
       Cruiser: {
         coordinates: [],
         length: 3,
+        hitCount: 0,
       },
       Destroyer: {
         coordinates: [],
         length: 4,
+        hitCount: 0,
       },
       Battleship: {
         coordinates: [],
         length: 4,
+        hitCount: 0,
       },
       AircraftCarrier: {
         coordinates: [],
         length: 5,
+        hitCount: 0,
       },
     };
     teamsArray.push(team);
@@ -234,7 +236,6 @@ function addGhostShip() {
   const ghostshipLength = 3;
   let validPlacement = false;
   const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
-
   while (!validPlacement) {
     let row,
       col = 0;
@@ -263,6 +264,7 @@ function addGhostShip() {
           ghostshipCoord.push([row, col + j]);
         }
       }
+      console.log(boatTypes);
       console.log(
         `Ghostship placed at direction: ${direction}, column: ${col}, row: ${row}`
       );
@@ -573,7 +575,6 @@ function game() {
     const target = input.value.toUpperCase(); // Convert input to uppercase for consistency
     if (target.length >= 2 && target.length <= 3) {
       analyzeHitOrMiss(target); // Call your function to analyze the hit or miss
-      teamTurn < numberOfTeams - 1 ? teamTurn++ : (teamTurn = 0);
       action.innerHTML = "";
       action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
 
@@ -590,45 +591,65 @@ function analyzeHitOrMiss(target) {
   const row = letter.charCodeAt(0) - "A".charCodeAt(0) + 1;
   const column = number;
 
-  let hit = false;
+  if (row < 1 || row >= grid || column < 1 || column >= grid) {
+    alert("out of range");
+  } else {
+    let hit = false;
+    let sunkMsg = "";
 
-  // Check through each team's ships
-  for (const team of teamsArray) {
-    for (const boatType in team) {
-      const coordinates = team[boatType].coordinates;
+    // Check through each team's ships
+    for (const team of teamsArray) {
+      for (const boatType in team) {
+        const coordinates = team[boatType].coordinates;
 
-      // Ensure coordinates is an array before iterating
-      if (Array.isArray(coordinates)) {
-        for (const coord of coordinates) {
-          if (coord[0] === row && coord[1] === column) {
-            hit = true; // A hit is found
-            break;
+        // Ensure coordinates is an array before iterating
+        if (Array.isArray(coordinates)) {
+          for (const coord of coordinates) {
+            if (coord[0] === row && coord[1] === column) {
+              hit = true; // A hit is found
+              team[boatType].hitCount++; // Increment the hit count for the ship
+              sunkMsg = checkIfSunk(team, boatType)
+                ? `${team.name}'s ${boatType} was sunk!`
+                : ""; // Check if the ship is sunk
+              teamTurn < numberOfTeams - 1 ? teamTurn++ : (teamTurn = 0);
+              break; // Exit the loop after a hit
+            }
           }
         }
+        if (hit) break; // Break out if hit is found
       }
       if (hit) break; // Break out if hit is found
     }
-    if (hit) break; // Break out if hit is found
-  }
 
-  // Change cell color based on hit or miss
-  if (hit) {
-    changeCellColor(row, column, "red"); // Color the cell red for a hit
+    // Change cell color based on hit or miss
     const fireResults = document.getElementById("fireResults");
-    fireResults.innerHTML = "";
-    const message = document.createElement("p");
-    message.textContent = `${target} was a HIT!`;
-    fireResults.appendChild(message);
-  } else {
-    changeCellColor(row, column, "blue"); // Color the cell blue for a miss
-    const fireResults = document.getElementById("fireResults");
-    fireResults.innerHTML = "";
-    const message = document.createElement("p");
-    message.textContent = `${target} was a Miss.`;
-    fireResults.appendChild(message);
-  }
+    fireResults.innerHTML = ""; // Clear previous results
+    if (hit) {
+      changeCellColor(row, column, "red"); // Color the cell red for a hit
+      const message = document.createElement("p");
+      message.textContent = `${target} was a HIT!`;
+      fireResults.appendChild(message);
 
-  console.log(
-    `Row: ${row}, Column: ${column}, Result: ${hit ? "Hit" : "Miss"}`
-  );
+      if (sunkMsg) {
+        const message2 = document.createElement("p");
+        message2.textContent = sunkMsg; // Display the sunk message
+        fireResults.appendChild(message2);
+      }
+    } else {
+      changeCellColor(row, column, "blue"); // Color the cell blue for a miss
+      const message = document.createElement("p");
+      message.textContent = `${target} was a Miss.`;
+      fireResults.appendChild(message);
+    }
+
+    console.log(
+      `Row: ${row}, Column: ${column}, Result: ${hit ? "Hit" : "Miss"}`
+    );
+  }
+}
+
+function checkIfSunk(team, boatType) {
+  console.log(`${team}'s ${boatType} was sunk inside chekifsunk function`);
+  const ship = team[boatType];
+  return ship.hitCount >= ship.length;
 }
