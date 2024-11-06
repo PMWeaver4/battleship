@@ -9,6 +9,9 @@ let teamTurn = 0;
 
 const teamsArray = [];
 const ghostshipCoord = [];
+let ghostshipHitCount = 0;
+let usedTargets = []; // Global array to store used targets
+
 const colors = [
   "#FF5733", // Red-Orange
   "#33FF57", // Green
@@ -261,7 +264,7 @@ function addGhostShip() {
         // Vertical
         for (let j = 0; j < ghostshipLength; j++) {
           changeCellColor(row + j, col, "white");
-          ghostshipCoord.push([row, col + j]);
+          ghostshipCoord.push([row + j, col]);
         }
       }
       console.log(boatTypes);
@@ -546,6 +549,7 @@ gridTable = addTable();
 function game() {
   gameplay = true;
   console.log("game has started");
+
   const menu = document.getElementById("menu");
   menu.innerHTML = ""; // Clear previous menu content
 
@@ -573,30 +577,39 @@ function game() {
   // Add event listener to the button
   button.addEventListener("click", function () {
     const target = input.value.toUpperCase(); // Convert input to uppercase for consistency
-    if (target.length >= 2 && target.length <= 3) {
-      analyzeHitOrMiss(target); // Call your function to analyze the hit or miss
-      action.innerHTML = "";
-      action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
 
-      input.value = ""; // Clear the input after submission
+    if (target.length >= 2 && target.length <= 3) {
+      // Check if target has already been used
+      if (usedTargets.includes(target)) {
+        alert(
+          "This target has already been fired upon. Please choose a different one."
+        );
+      } else {
+        analyzeHitOrMiss(target); // Call your function to analyze the hit or miss
+        usedTargets.push(target); // Add the target to the used targets array
+        action.innerHTML = "";
+        action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
+
+        input.value = ""; // Clear the input after submission
+      }
     } else {
       alert("Please enter exactly a letter and a number (e.g., A1).");
     }
   });
 
-  //create some space between buttons
+  // Create some space between buttons
   const spacer = document.createElement("div");
   spacer.style.height = "100px"; // Adjust height for the desired spacing
   menu.appendChild(spacer);
 
   // Add the game over button
   const gameOverButton = document.createElement("button");
-  gameOverButton.textContent = "end the game";
+  gameOverButton.textContent = "End the game";
   menu.appendChild(gameOverButton);
 
-  //add event listener for game end
+  // Add event listener for game end
   gameOverButton.addEventListener("click", function () {
-    console.log("game over, man");
+    console.log("Game over, man");
   });
 }
 
@@ -607,12 +620,12 @@ function analyzeHitOrMiss(target) {
   const column = number;
 
   if (row < 1 || row >= grid || column < 1 || column >= grid) {
-    alert("out of range");
+    alert("Out of range");
   } else {
     let hit = false;
     let sunkMsg = "";
 
-    // Check through each team's ships.....don't forget the ghost ship!!!
+    // Check through each team's ships... Don't forget the ghost ship!!!
     for (const team of teamsArray) {
       for (const boatType in team) {
         const coordinates = team[boatType].coordinates;
@@ -633,6 +646,20 @@ function analyzeHitOrMiss(target) {
         }
         if (hit) break; // Break out if hit is found
       }
+
+      // Check if the ghost ship was hit
+      if (
+        ghostshipCoord.some((coord) => coord[0] === row && coord[1] === column)
+      ) {
+        hit = true; // Ghost ship hit
+        ghostshipHitCount++; // Increment the ghost ship hit count
+        sunkMsg =
+          ghostshipHitCount >= ghostshipCoord.length
+            ? "The Ghost Ship has been sunk!"
+            : ""; // Check if the ghost ship is sunk
+        break; // Exit the loop after a hit
+      }
+
       if (hit) break; // Break out if hit is found
     }
 
@@ -672,8 +699,6 @@ function checkIfSunk(team, boatType) {
 
 //to do list
 /*
-make grid selections unique (can't choose the same spot twice)
-make analyzehitormiss include ghost ship
 make quadrant limitation in placing ships
 make endgame button do something: disable buttons, and display score
 */
