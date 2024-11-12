@@ -6,6 +6,7 @@ let teamLocked = false;
 let gameplay = false;
 let gridTable; //global variable to store table
 let teamTurn = 0;
+let round = 1;
 
 const teamsArray = [];
 const ghostshipCoord = [];
@@ -144,6 +145,7 @@ function createTeams(numberOfTeams) {
     let team = {
       id: "team" + i,
       name: document.getElementById(`teamName${i}`).value,
+      score: 0,
       color: colors[(i - 1) % colors.length],
       PTBoat: {
         coordinates: [],
@@ -182,6 +184,7 @@ function createTeams(numberOfTeams) {
 }
 
 function arrangeBoats(numberOfShips) {
+  //isn't nunmberOfShips global, do I really need to pass it here?
   for (let i = 0; i < numberOfTeams; i++) {
     // Array of boat types
     console.log(`the number of ships is ${numberOfShips}`);
@@ -553,10 +556,16 @@ function game() {
   const menu = document.getElementById("menu");
   menu.innerHTML = ""; // Clear previous menu content
 
+  // const roundDisplay = document.getElementById("round");
+  const roundMessage = document.createElement("p");
+  roundMessage.textContent = `Round ${round}`;
+  // roundDisplay.appendChild(roundMessage);
+
   addTable(); // Function to add the game table
 
   const action = document.createElement("p");
   action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
+  menu.appendChild(roundMessage);
   menu.appendChild(action);
 
   const input = document.createElement("input");
@@ -591,6 +600,9 @@ function game() {
         action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
 
         input.value = ""; // Clear the input after submission
+
+        roundMessage.innterHTML = "";
+        roundMessage.textContent = `Round ${round}`;
       }
     } else {
       alert("Please enter exactly a letter and a number (e.g., A1).");
@@ -609,7 +621,9 @@ function game() {
 
   // Add event listener for game end
   gameOverButton.addEventListener("click", function () {
-    console.log("Game over, man");
+    button.disabled = true;
+    gameOverButton.disabled = true;
+    score();
   });
 }
 
@@ -639,7 +653,6 @@ function analyzeHitOrMiss(target) {
               sunkMsg = checkIfSunk(team, boatType)
                 ? `${team.name}'s ${boatType} was sunk!`
                 : ""; // Check if the ship is sunk
-              teamTurn < numberOfTeams - 1 ? teamTurn++ : (teamTurn = 0);
               break; // Exit the loop after a hit
             }
           }
@@ -682,8 +695,9 @@ function analyzeHitOrMiss(target) {
       const message = document.createElement("p");
       message.textContent = `${target} was a Miss.`;
       fireResults.appendChild(message);
-      teamTurn < numberOfTeams - 1 ? teamTurn++ : (teamTurn = 0);
     }
+    teamTurn < numberOfTeams - 1 ? teamTurn++ : ((teamTurn = 0), round++);
+    console.log("round" + round);
 
     console.log(
       `Row: ${row}, Column: ${column}, Result: ${hit ? "Hit" : "Miss"}`
@@ -697,8 +711,36 @@ function checkIfSunk(team, boatType) {
   return ship.hitCount >= ship.length;
 }
 
+function score() {
+  console.log("Score!");
+  const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
+  for (const team of teamsArray) {
+    for (const boatType of boatTypes) {
+      if (team[boatType].hitCount === 0) {
+        team.score = team.score + 25;
+        console.log(team.name, team.score);
+      }
+      if (
+        team[boatType].hitCount > 0 &&
+        team[boatType].hitCount < team[boatType].length
+      ) {
+        team.score = team.score + 7;
+        console.log(team.name, team.score);
+      }
+    }
+  }
+  for (i = 0; i < numberOfTeams; i++) {
+    const menu = document.getElementById("menu");
+    const teamScore = document.createElement("p");
+    teamScore.textContent = teamsArray[i].name + ": " + teamsArray[i].score;
+
+    menu.appendChild(teamScore);
+  }
+}
+
 //to do list
 /*
 make quadrant limitation in placing ships
-make endgame button do something: disable buttons, and display score
+how about a "are you sure you want to end the game?"
+
 */
