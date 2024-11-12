@@ -7,7 +7,6 @@ let gameplay = false;
 let gridTable; //global variable to store table
 let teamTurn = 0;
 let round = 1;
-
 const teamsArray = [];
 const ghostshipCoord = [];
 let ghostshipHitCount = 0;
@@ -89,7 +88,6 @@ function nameTeams(numberOfTeams) {
     // Add event listener for the finalize button
     finalizeButton.addEventListener("click", function () {
       const teams = createTeams(numberOfTeams);
-      console.log(teams); // Now teams will have names populated from input fields
       finalizeButton.disabled = true;
       finalizeButton.style.display = "none";
 
@@ -187,8 +185,6 @@ function arrangeBoats(numberOfShips) {
   //isn't nunmberOfShips global, do I really need to pass it here?
   for (let i = 0; i < numberOfTeams; i++) {
     // Array of boat types
-    console.log(`the number of ships is ${numberOfShips}`);
-    // Limit the boat types based on the number of ships chosen
     const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
 
     for (const boatType of boatTypes) {
@@ -224,14 +220,7 @@ function arrangeBoats(numberOfShips) {
             }
           }
         }
-        console.log(
-          `Team ${
-            i + 1
-          }: Placed ${boatType} at direction: ${direction}, column: ${col}, row: ${row}`
-        );
       }
-
-      console.log(teamsArray[i]);
     }
   }
   addGhostShip();
@@ -270,10 +259,6 @@ function addGhostShip() {
           ghostshipCoord.push([row + j, col]);
         }
       }
-      console.log(boatTypes);
-      console.log(
-        `Ghostship placed at direction: ${direction}, column: ${col}, row: ${row}`
-      );
     }
   }
 }
@@ -281,6 +266,8 @@ function addGhostShip() {
 function displayTeamFilter() {
   const container = document.getElementById("teamFilter");
   container.innerHTML = ""; // Clear previous content
+  // Add a border to the container
+  container.style.border = "2px solid #000";
 
   // Create label for filter
   const selectTeamLabel = document.createElement("label");
@@ -359,7 +346,6 @@ function displayShipCoordinates(selectedTeam) {
   coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
   if (selectedTeam == "ghostShip") {
     const coordinates = ghostshipCoord;
-    console.log(coordinates);
     if (coordinates.length > 0) {
       const coordinatesText = `Ghost Ship: ${coordinates
         .map((coord) => `(${String.fromCharCode(coord[0] + 64)}, ${coord[1]})`)
@@ -450,15 +436,12 @@ function checkForConflict(row, col, boatLength, direction, boatTypes) {
             currentCoord[0] === existingCoord[0] &&
             currentCoord[1] === existingCoord[1]
           ) {
-            console.log("conflict found");
             return true; // Conflict found
           }
         }
       }
     }
   }
-
-  console.log("no conflict found");
   return false; // No conflict found
 }
 
@@ -551,15 +534,11 @@ gridTable = addTable();
 
 function game() {
   gameplay = true;
-  console.log("game has started");
-
   const menu = document.getElementById("menu");
   menu.innerHTML = ""; // Clear previous menu content
 
-  // const roundDisplay = document.getElementById("round");
   const roundMessage = document.createElement("p");
   roundMessage.textContent = `Round ${round}`;
-  // roundDisplay.appendChild(roundMessage);
 
   addTable(); // Function to add the game table
 
@@ -621,9 +600,20 @@ function game() {
 
   // Add event listener for game end
   gameOverButton.addEventListener("click", function () {
-    button.disabled = true;
-    gameOverButton.disabled = true;
-    score();
+    // Show confirmation dialog
+    const userConfirmed = window.confirm(
+      "Are you sure you want to end the game?"
+    );
+
+    // If the user confirms, proceed with ending the game
+    if (userConfirmed) {
+      button.disabled = true;
+      gameOverButton.disabled = true;
+      score(); // Call the score function to finalize the game
+    } else {
+      // Optionally, you could display a message or log something here if they cancel
+      console.log("Game ending cancelled.");
+    }
   });
 }
 
@@ -697,35 +687,26 @@ function analyzeHitOrMiss(target) {
       fireResults.appendChild(message);
     }
     teamTurn < numberOfTeams - 1 ? teamTurn++ : ((teamTurn = 0), round++);
-    console.log("round" + round);
-
-    console.log(
-      `Row: ${row}, Column: ${column}, Result: ${hit ? "Hit" : "Miss"}`
-    );
   }
 }
 
 function checkIfSunk(team, boatType) {
-  console.log(`${team}'s ${boatType} was sunk inside chekifsunk function`);
   const ship = team[boatType];
   return ship.hitCount >= ship.length;
 }
 
 function score() {
-  console.log("Score!");
   const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
   for (const team of teamsArray) {
     for (const boatType of boatTypes) {
       if (team[boatType].hitCount === 0) {
         team.score = team.score + 25;
-        console.log(team.name, team.score);
       }
       if (
         team[boatType].hitCount > 0 &&
         team[boatType].hitCount < team[boatType].length
       ) {
         team.score = team.score + 7;
-        console.log(team.name, team.score);
       }
     }
   }
@@ -733,14 +714,11 @@ function score() {
     const menu = document.getElementById("menu");
     const teamScore = document.createElement("p");
     teamScore.textContent = teamsArray[i].name + ": " + teamsArray[i].score;
-
     menu.appendChild(teamScore);
   }
 }
-
 //to do list
 /*
 make quadrant limitation in placing ships
 how about a "are you sure you want to end the game?"
-
 */

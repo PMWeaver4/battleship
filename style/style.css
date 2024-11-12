@@ -60,7 +60,7 @@ footer {
 }
 
 #teamFilter {
-    border: 2px solid #000; /* Change #000 to any color you like */
+    /* border: 2px solid #000; Change #000 to any color you like */
     padding: 10px; /* Optional: Add some padding for better spacing */
     margin: 10px 0; /* Optional: Add margin to separate it from other elements */
   }
