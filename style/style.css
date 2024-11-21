@@ -9,7 +9,9 @@ body{
 }
 
 
+
 header {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 4em;
               /* Text color */
     padding: 15px;             /* Padding around header */
@@ -30,19 +32,32 @@ header {
 
 #myDynamicTable {
     flex-grow: 1;              /* Allow the table to take remaining space */
-    padding: 20px;             /* Optional padding */
+    padding: 5px;             /* Optional padding */
     overflow: auto;            /* Allow scrolling if content overflows */
+    text-align: center;
+    justify-content: center;
 }
 
 table {
     border-collapse: collapse; /* Make table borders collapse */
-    width: 100%; /* Table takes full width of its container */
+    text-align: center;
+    justify-content: center;
+    margin: 0 auto;
+    /* width: 100%;  */
+    /* Table takes full width of its container */
   }
   
   th, td {
-    padding: 10px; /* Space inside cells */
+    padding: 1px; /* Space inside cells */
     text-align: center; /* Center text */
+    width: 4vh;
+    
+}
+tr {
+      height: 4vh;
   }
+
+
 
 
 
@@ -50,11 +65,12 @@ table {
 footer {
     display: flex;
     justify-content: center;
+    align-items: center;
     border: 1px solid black;
     background-color: grey;
     margin: 0.5em;
     padding: 1em;
-    width: 60%;
+    width:100%;
     position: -webkit-sticky;
     bottom: 10%;
 }
