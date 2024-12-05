@@ -4,7 +4,7 @@ const quadrantSize = Math.floor(gridSize / 2); // Size of each quadrant, rounded
 const remainder = gridSize % 2; // The remainder to adjust the quadrants if necessary
 let numberOfTeams = 2;
 let numberOfShips = 2;
-let gridLocked = false;
+let gridLocked = true;
 let teamLocked = false;
 let gameplay = false;
 let gridTable; //global variable to store table
@@ -521,16 +521,16 @@ function addTable() {
   return gridTable; // Optional: still return it if needed
 }
 
-document.getElementById("grid").addEventListener("change", function () {
-  const selectedValue = parseInt(this.value); // Get the selected value
-  grid = selectedValue + 1;
-  document.getElementById(
-    "selectedGrid"
-  ).textContent = `${selectedValue} x ${selectedValue} board`;
+// document.getElementById("grid").addEventListener("change", function () {
+//   const selectedValue = parseInt(this.value); // Get the selected value
+//   grid = selectedValue + 1;
+//   document.getElementById(
+//     "selectedGrid"
+//   ).textContent = `${selectedValue} x ${selectedValue} board`;
 
-  // Add the table with the new grid size
-  gridTable = addTable(); // Update the grid table with the new size
-});
+//   // Add the table with the new grid size
+//   gridTable = addTable(); // Update the grid table with the new size
+// });
 document
   .getElementById("numberOfTeams")
   .addEventListener("change", function () {
