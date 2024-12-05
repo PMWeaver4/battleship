@@ -1,4 +1,7 @@
-let grid = 21;
+const grid = 24; // Full grid size
+const gridSize = grid - 1; // Grid size excluding labels (23 rows/columns)
+const quadrantSize = Math.floor(gridSize / 2); // Size of each quadrant, rounded down
+const remainder = gridSize % 2; // The remainder to adjust the quadrants if necessary
 let numberOfTeams = 2;
 let numberOfShips = 2;
 let gridLocked = false;
@@ -487,18 +490,26 @@ function addTable() {
     }
   }
 
-  // Apply background colors for each 5x5 quadrant
-  for (let i = 1; i < grid - 1; i += (grid - 1) / 2) {
-    for (let j = 1; j < grid - 1; j += (grid - 1) / 2) {
-      const quadrantClass = (i / ((grid - 1) / 2)) * 2 + j / ((grid - 1) / 2); // Determine quadrant number
-      for (let x = 0; x < (grid - 1) / 2; x++) {
-        for (let y = 0; y < (grid - 1) / 2; y++) {
-          if (i + x < grid && j + y < grid) {
+  // Loop through rows and columns to assign classes to cells in quadrants
+  for (let i = 1; i <= gridSize; i += quadrantSize + remainder) {
+    for (let j = 1; j <= gridSize; j += quadrantSize + remainder) {
+      // Calculate quadrant class (either 0, 1, 2, or 3)
+      let quadrantClass;
+      if (i < quadrantSize + remainder) {
+        quadrantClass = j < quadrantSize + remainder ? 0 : 1; // Top-left: 0, Top-right: 1
+      } else {
+        quadrantClass = j < quadrantSize + remainder ? 2 : 3; // Bottom-left: 2, Bottom-right: 3
+      }
+
+      // Iterate through the cells in the quadrant
+      for (let x = 0; x < quadrantSize + remainder; x++) {
+        for (let y = 0; y < quadrantSize + remainder; y++) {
+          // Ensure we're within the bounds of the grid
+          if (i + x <= gridSize && j + y <= gridSize) {
             const quadrantCell = gridTable.rows[i + x].cells[j + y];
             if (quadrantCell) {
-              quadrantCell.classList.add(
-                `quadrant-${Math.ceil(quadrantClass)}`
-              );
+              // Add the class for the current quadrant
+              quadrantCell.classList.add(`quadrant-${quadrantClass}`);
             }
           }
         }

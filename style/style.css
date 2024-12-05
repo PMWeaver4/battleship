@@ -81,15 +81,15 @@ footer {
     margin: 10px 0; /* Optional: Add margin to separate it from other elements */
   }
 
-.quadrant-1 {
+.quadrant-0 {
     background-color: lightgray; /* Color for Quadrant 1 */
 }
-.quadrant-2 {
+.quadrant-1 {
     background-color: lightgray; /* Color for Quadrant 2 */
 }
-.quadrant-3 {
+.quadrant-2 {
     background-color: lightgray; /* Color for Quadrant 3 */
 }
-.quadrant-4 {
+.quadrant-3 {
     background-color: lightgray; /* Color for Quadrant 4 */
 }
