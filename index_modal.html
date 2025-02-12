@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Battleship</title>
+    <link href="style/style.css" rel="stylesheet" />
+    <style>
+      /* Modal Styles */
+      #menuModal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Fixed in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+      }
+
+      /* Modal Content */
+      .modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Adjust the width of the modal */
+        max-width: 600px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Welcome to Battleship!</header>
+
+    <div class="container">
+      <!-- Modal -->
+      <div id="menuModal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <p><b>MENU</b></p>
+
+          <!-- <label for="Grid Size" id="gridSizeLabel">Choose a grid:</label>
+          <select id="grid">
+              <option value="23">default</option>
+              <option value="10">10x10</option>
+              <option value="12">12x12</option>
+              <option value="16">16x16</option>
+              <option value="20">20x20</option>
+          </select>
+          <button id="lockGridButton" onclick="lockGrid()">Lock Grid Size</button> -->
+
+          <p id="selectedGrid">23 x 23 board</p>
+
+          <label for="Number of Teams" id="numberOfTeamsLabel">Choose the number of Teams:</label>
+          <select id="numberOfTeams">
+            <option value="2">default</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
+          <button id="lockTeamButton" onclick="lockTeams()">Lock the number of teams.</button>
+          <p id="selectedNumberOfTeams">2 Teams</p>
+          <div id="nameTeams"></div>
+          <div id="numberOfShips"></div>
+          <div id="teamFilter"></div>
+          <div id="fireResults"></div>
+          <div id="gameButton"></div>
+          <div id="gameEnd"></div>
+        </div>
+      </div>
+
+      <div id="round"></div>
+      <!-- Javascript builds the table -->
+      <div id="myDynamicTable"></div>
+    </div>
+
+    <script src="./scripts/index.js" defer></script>
+    <script>
+      // Function to show the modal
+      window.onload = function () {
+        var modal = document.getElementById("menuModal");
+        modal.style.display = "block";
+      };
+
+      // Function to close the modal
+      function closeModal() {
+        var modal = document.getElementById("menuModal");
+        modal.style.display = "none";
+      }
+    </script>
+  </body>
+  <footer>
+    This Battleship Web App was developed by PMWeaver <a href="https://www.linkedin.com/in/paul-weaver-8622a929a/">LinkedIn profile</a>
+  </footer>
+</html>

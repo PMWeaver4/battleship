@@ -1,3 +1,6 @@
+//this is a historical index, before changes to boat input - manual instead of automatic
+//and round change - multiple turns per round per team
+
 const grid = 24; // Full grid size
 const gridSize = grid - 1; // Grid size excluding labels (23 rows/columns)
 const quadrantSize = Math.floor(gridSize / 2); // Size of each quadrant, rounded down
@@ -33,6 +36,20 @@ const arrayOfBoats = [
   "Battleship",
   "AircraftCarrier",
 ];
+
+function lockGrid() {
+  const lockButton = document.getElementById("lockGridButton");
+  const gridSizeInput = document.getElementById("grid");
+  const gridSizeLabel = document.getElementById("gridSizeLabel");
+
+  lockButton.disabled = true; // Disable the lock button
+  gridSizeInput.disabled = true; // Disable the grid size input
+  lockButton.style.display = "none"; // Hide the lock button
+  gridSizeInput.style.display = "none"; // Hide the grid input
+  gridSizeLabel.style.display = "none";
+
+  gridLocked = true;
+}
 
 function lockTeams() {
   const lockButton = document.getElementById("lockTeamButton");
@@ -135,7 +152,6 @@ function createTeams(numberOfTeams) {
       id: "team" + i,
       name: document.getElementById(`teamName${i}`).value,
       score: 0,
-      numberOfTurns: 0,
       color: colors[(i - 1) % colors.length],
       PTBoat: {
         coordinates: [],
@@ -171,6 +187,53 @@ function createTeams(numberOfTeams) {
     teamsArray.push(team);
   }
   return teamsArray;
+}
+
+//arrangeBoats(numberOfShips)
+function arrangeBoats(numberOfShips) {
+  //isn't nunmberOfShips global, do I really need to pass it here?
+  for (let i = 0; i < numberOfTeams; i++) {
+    // Array of boat types
+    const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
+
+    for (const boatType of boatTypes) {
+      let boatLength = teamsArray[i][boatType].length; // Get the length for the current boat
+      let validPlacement = false;
+
+      while (!validPlacement) {
+        let row,
+          col = 0;
+        let direction = coinFlip();
+
+        if (direction === "Horizontal") {
+          row = Math.floor(Math.random() * (grid - 1)) + 1;
+          col = Math.floor(Math.random() * (grid - boatLength - 1)) + 1;
+        } else {
+          // Vertical
+          row = Math.floor(Math.random() * (grid - boatLength - 1)) + 1;
+          col = Math.floor(Math.random() * (grid - 1)) + 1;
+        }
+
+        if (!checkForConflict(row, col, boatLength, direction, boatTypes)) {
+          validPlacement = true; // Found a valid placement
+          if (direction === "Horizontal") {
+            for (let j = 0; j < boatLength; j++) {
+              changeCellColor(row, col + j, teamsArray[i].color);
+              teamsArray[i][boatType].coordinates.push([row, col + j]);
+            }
+          } else {
+            // Vertical
+            for (let j = 0; j < boatLength; j++) {
+              changeCellColor(row + j, col, teamsArray[i].color);
+              teamsArray[i][boatType].coordinates.push([row + j, col]);
+            }
+          }
+        }
+      }
+    }
+  }
+  addGhostShip();
+  displayTeamFilter();
 }
 
 function arrangeBoatsManually(numberOfShips) {
@@ -486,9 +549,9 @@ function addTable() {
       } else {
         td.appendChild(document.createTextNode(`${letter}${j}`));
         tr.appendChild(td);
-        // td.addEventListener("click", () => {
-        //   alert("yo");
-        // });
+        td.addEventListener("click", () => {
+          alert("yo");
+        });
       }
     }
   }
@@ -524,6 +587,16 @@ function addTable() {
   return gridTable; // Optional: still return it if needed
 }
 
+// document.getElementById("grid").addEventListener("change", function () {
+//   const selectedValue = parseInt(this.value); // Get the selected value
+//   grid = selectedValue + 1;
+//   document.getElementById(
+//     "selectedGrid"
+//   ).textContent = `${selectedValue} x ${selectedValue} board`;
+
+//   // Add the table with the new grid size
+//   gridTable = addTable(); // Update the grid table with the new size
+// });
 document
   .getElementById("numberOfTeams")
   .addEventListener("change", function () {
@@ -545,12 +618,6 @@ function game() {
   roundMessage.textContent = `Round ${round}`;
 
   addTable(); // Function to add the game table
-
-  //function to prompt how many each team got correct
-  //function to convert correct answers into turns
-  //function to place team names into array based on number of turns
-
-  //function that randomly chooses turn, teamTurn = math.random*numberOfTurns, and removes teams turn from array
 
   const action = document.createElement("p");
   action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
@@ -696,7 +763,6 @@ function analyzeHitOrMiss(target) {
       message.textContent = `${target} was a Miss.`;
       fireResults.appendChild(message);
     }
-
     teamTurn < numberOfTeams - 1 ? teamTurn++ : ((teamTurn = 0), round++);
   }
 }
