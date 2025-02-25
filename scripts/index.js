@@ -47,7 +47,8 @@ function lockTeams() {
 
   teamLocked = true;
   // Generate input fields for team names
-  nameTeams(numberOfTeams);
+  chooseShips();
+  // nameTeams(numberOfTeams);
 }
 
 function nameTeams(numberOfTeams) {
@@ -90,9 +91,13 @@ function nameTeams(numberOfTeams) {
   }
 }
 
+//function to choose the number of ships
 function chooseShips() {
   const container = document.getElementById("numberOfShips");
   container.innerHTML = ""; // Clear existing inputs
+  display = document.createElement("p");
+  display.textContent = "How many ships?";
+  container.appendChild(display);
   finalizeButton = document.createElement("button");
   finalizeButton.id = "finalizeShipsButton";
   finalizeButton.textContent = "Finalize Number of Ships";
@@ -125,6 +130,8 @@ function chooseShips() {
     selectElement.style.display = "none";
     // arrangeBoats(numberOfShips);
     //need to add a function to place the boats manually - ensure that hit or miss records hit on multiple boats if they overlap
+    container.innerHTML = ""; // Clear existing inputs
+    nameTeams(numberOfShips);
     arrangeBoatsManually(numberOfShips);
   });
 }
@@ -175,6 +182,14 @@ function createTeams(numberOfTeams) {
 
 function arrangeBoatsManually(numberOfShips) {
   // Assume the boats are arranged manually
+
+  const container = document.getElementById("shipPlacement");
+  container.innerHTML = ""; // Clear existing inputs
+  displayMessage = createElement("p");
+  displayMessage.textContent =
+    "Here's where we figure out the placement of ships.";
+  container.appendChild(displayMessage);
+
   for (let i = 0; i < numberOfTeams; i++) {
     // Array of boat types
     const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
@@ -182,50 +197,6 @@ function arrangeBoatsManually(numberOfShips) {
     for (const boatType of boatTypes) {
       let boatLength = teamsArray[i][boatType].length; // Get the length for the current boat
       let validPlacement = false;
-
-      while (!validPlacement) {
-        let row, col, direction;
-
-        // Here you can replace this with manual input, for example using a prompt
-        // For now, I will simulate this by just manually setting the values
-        // In a real application, you would replace this with actual user input code (UI-based or prompt)
-
-        // Manual row, column, and direction input (for example, prompt or UI selection)
-        row = parseInt(prompt(`Enter row for ${boatType} (team ${i + 1}):`)); // Example: ask user for row
-        col = parseInt(prompt(`Enter column for ${boatType} (team ${i + 1}):`)); // Example: ask user for column
-        direction = prompt(
-          `Enter direction for ${boatType} (Horizontal/Vertical):`
-        ); // Example: ask user for direction
-
-        // Since we are allowing overlapping, no conflict check is needed
-        if (direction === "Horizontal") {
-          if (col + boatLength <= grid) {
-            // Ensure the boat fits in the grid horizontally
-            validPlacement = true;
-            // Update the grid
-            for (let j = 0; j < boatLength; j++) {
-              changeCellColor(row, col + j, teamsArray[i].color);
-              teamsArray[i][boatType].coordinates.push([row, col + j]);
-            }
-          } else {
-            alert("The boat doesn't fit horizontally. Please try again.");
-          }
-        } else if (direction === "Vertical") {
-          if (row + boatLength <= grid) {
-            // Ensure the boat fits in the grid vertically
-            validPlacement = true;
-            // Update the grid
-            for (let j = 0; j < boatLength; j++) {
-              changeCellColor(row + j, col, teamsArray[i].color);
-              teamsArray[i][boatType].coordinates.push([row + j, col]);
-            }
-          } else {
-            alert("The boat doesn't fit vertically. Please try again.");
-          }
-        } else {
-          alert("Invalid direction. Please choose Horizontal or Vertical.");
-        }
-      }
     }
   }
 
@@ -451,6 +422,34 @@ function checkForConflict(row, col, boatLength, direction, boatTypes) {
   return false; // No conflict found
 }
 
+let highlightMode = "horizontal"; // Default is horizontal
+
+// Function to update the highlight mode based on the key pressed
+function handleKeyPress(event) {
+  if (event.key === "h") {
+    highlightMode = "horizontal"; // Set highlight mode to horizontal
+    console.log("Highlight mode set to horizontal");
+  } else if (event.key === "v") {
+    highlightMode = "vertical"; // Set highlight mode to vertical
+    console.log("Highlight mode set to vertical");
+  }
+
+  // Reset highlight color for all cells when mode changes
+  resetHighlightedCells();
+}
+
+// Function to reset the background color of all cells
+function resetHighlightedCells() {
+  let cells = gridTable.getElementsByTagName("td");
+  for (let cell of cells) {
+    cell.style.backgroundColor = "";
+  }
+}
+
+// Listen for the 'keydown' event to switch between horizontal and vertical mode
+document.addEventListener("keydown", handleKeyPress);
+
+// Function to add the table with mouseover functionality
 function addTable() {
   let myTableDiv = document.getElementById("myDynamicTable");
   while (myTableDiv.firstChild) {
@@ -473,22 +472,64 @@ function addTable() {
       if (i == 0 && j == 0) {
         th.appendChild(document.createTextNode(""));
         tr.appendChild(th);
-        th.style.backgroundColor = "rgb(169, 169, 169)";
+        th.style.backgroundColor = "rgb(255, 255, 255)";
       } else if (i == 0) {
         th.appendChild(document.createTextNode(j));
         tr.appendChild(th);
-        th.style.backgroundColor = "rgb(169, 169, 169)";
+        th.style.backgroundColor = "rgb(255, 255, 255)";
       } else if (j == 0) {
         letter = String.fromCharCode(i + 64);
         td.appendChild(document.createTextNode(`${letter}`));
         tr.appendChild(td);
-        td.style.backgroundColor = "rgb(169, 169, 169)";
+        td.style.backgroundColor = "rgb(255, 255, 255)";
       } else {
         td.appendChild(document.createTextNode(`${letter}${j}`));
         tr.appendChild(td);
-        // td.addEventListener("click", () => {
-        //   alert("yo");
-        // });
+
+        // Add mouseover and mouseout event listeners to each cell
+        td.addEventListener("mouseover", function () {
+          // Highlight the current cell
+          td.style.backgroundColor = "#f0f0f0";
+
+          if (highlightMode === "horizontal") {
+            // Highlight the next cell in the row (if it exists)
+            let nextCell = td.nextElementSibling;
+            if (nextCell) {
+              nextCell.style.backgroundColor = "#f0f0f0";
+            }
+          } else if (highlightMode === "vertical") {
+            // Highlight the cell below (if it exists)
+            let nextRow = gridTable.rows[i + 1]; // Get the next row
+            if (nextRow) {
+              let nextCellInRow = nextRow.cells[j]; // Get the cell below
+              if (nextCellInRow) {
+                nextCellInRow.style.backgroundColor = "#f0f0f0";
+              }
+            }
+          }
+        });
+
+        td.addEventListener("mouseout", function () {
+          // Reset the current cell background color
+          td.style.backgroundColor = "";
+
+          if (highlightMode === "horizontal") {
+            // Reset the next cell background color (if it exists)
+            let nextCell = td.nextElementSibling;
+            if (nextCell) {
+              nextCell.style.backgroundColor = "";
+            }
+          } else if (highlightMode === "vertical") {
+            // Reset the cell below (if it exists)
+            let nextRow = gridTable.rows[i + 1]; // Get the next row
+            if (nextRow) {
+              let nextCellInRow = nextRow.cells[j]; // Get the cell below
+              if (nextCellInRow) {
+                nextCellInRow.style.backgroundColor = "";
+              }
+            }
+          }
+        });
       }
     }
   }

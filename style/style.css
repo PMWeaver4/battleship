@@ -57,6 +57,10 @@ tr {
       height: 4vh;
   }
 
+  td.hovered {
+    background-color: beige;
+  }
+
 
 
 
