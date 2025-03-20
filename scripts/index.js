@@ -1,30 +1,27 @@
 const grid = 24; // Full grid size
 const gridSize = grid - 1; // Grid size excluding labels (23 rows/columns)
-const quadrantSize = Math.floor(gridSize / 2); // Size of each quadrant, rounded down
-const remainder = gridSize % 2; // The remainder to adjust the quadrants if necessary
-let numberOfTeams = 2;
+let numberOfTeams = 0;
 let numberOfShips = 2;
-let gridLocked = true;
-let teamLocked = false;
-let gameplay = false;
+let selectMode = false;
+let clickedCoordinate = [];
+let gameplay,
+  turnsCreated = false;
 let gridTable; //global variable to store table
-let teamTurn = 0;
+let currentTurn = 0;
 let round = 1;
 const teamsArray = [];
-const ghostshipCoord = [];
-let ghostshipHitCount = 0;
+let turnsArray = [];
 let usedTargets = []; // Global array to store used targets
+let currentTurnIndex = 0;
+let currentTeamID = 0;
+let currentTeam = [];
+const fireResults = document.getElementById("fireResults");
+const input = document.getElementById("input");
+const action = document.getElementById("action");
+const button = document.getElementById("button");
 
-const colors = [
-  "#FF5733", // Red-Orange
-  "#33FF57", // Green
-  "#3357FF", // Blue
-  "#F1C40F", // Yellow
-  "#8E44AD", // Purple
-  "#E74C3C", // Red
-  "#1ABC9C", // Turquoise
-  "#FF8C00", // Dark Orange
-];
+colors = ["Blue", "Black", "Orange", "Yellow", "Green", "Red", "Aqua"];
+
 const arrayOfBoats = [
   "PTBoat",
   "Submarine",
@@ -33,63 +30,11 @@ const arrayOfBoats = [
   "Battleship",
   "AircraftCarrier",
 ];
+const arrayOfBoatLengths = [2, 3, 3, 4, 4, 5];
 
-function lockTeams() {
-  const lockButton = document.getElementById("lockTeamButton");
-  const teamSizeInput = document.getElementById("numberOfTeams");
-  const teamSizeLabel = document.getElementById("numberOfTeamsLabel");
-
-  lockButton.disabled = true; // Disable the lock button
-  teamSizeInput.disabled = true; // Disable the grid size input
-  lockButton.style.display = "none"; // Hide the lock button
-  teamSizeInput.style.display = "none"; // Hide the grid input
-  teamSizeLabel.style.display = "none";
-
-  teamLocked = true;
-  // Generate input fields for team names
-  chooseShips();
-  // nameTeams(numberOfTeams);
-}
-
-function nameTeams(numberOfTeams) {
-  if (teamLocked && gridLocked) {
-    const container = document.getElementById("nameTeams");
-    container.innerHTML = ""; // Clear existing inputs
-
-    const inputs = []; // Store inputs to hide later
-
-    for (let i = 0; i < numberOfTeams; i++) {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = `Team ${i + 1} Name`;
-      input.className = "team-name";
-      input.id = `teamName${i + 1}`;
-      input.style.backgroundColor = colors[i % colors.length]; // Set the background color
-      container.appendChild(input);
-      inputs.push(input); // Add input to the array
-    }
-
-    // Create the finalize button
-    const finalizeButton = document.createElement("button");
-    finalizeButton.id = "finalizeTeamsButton";
-    finalizeButton.textContent = "Finalize Team Names";
-    container.appendChild(finalizeButton);
-
-    // Add event listener for the finalize button
-    finalizeButton.addEventListener("click", function () {
-      const teams = createTeams(numberOfTeams);
-      finalizeButton.disabled = true;
-      finalizeButton.style.display = "none";
-
-      // Hide the input fields
-      inputs.forEach((input) => {
-        input.style.display = "none";
-      });
-
-      chooseShips(); // Proceed to choose ships
-    });
-  }
-}
+window.onload = function () {
+  addTable(); // Call the addTable function when the page is loaded
+};
 
 //function to choose the number of ships
 function chooseShips() {
@@ -131,239 +76,203 @@ function chooseShips() {
     // arrangeBoats(numberOfShips);
     //need to add a function to place the boats manually - ensure that hit or miss records hit on multiple boats if they overlap
     container.innerHTML = ""; // Clear existing inputs
-    nameTeams(numberOfShips);
-    arrangeBoatsManually(numberOfShips);
+
+    arrangeBoatsManually();
   });
 }
 
-function createTeams(numberOfTeams) {
-  for (let i = 1; i <= numberOfTeams; i++) {
-    let team = {
-      id: "team" + i,
-      name: document.getElementById(`teamName${i}`).value,
-      score: 0,
-      numberOfTurns: 0,
-      color: colors[(i - 1) % colors.length],
-      PTBoat: {
-        coordinates: [],
-        length: 2,
-        hitCount: 0,
-      },
-      Submarine: {
-        coordinates: [],
-        length: 3,
-        hitCount: 0,
-      },
-      Cruiser: {
-        coordinates: [],
-        length: 3,
-        hitCount: 0,
-      },
-      Destroyer: {
-        coordinates: [],
-        length: 4,
-        hitCount: 0,
-      },
-      Battleship: {
-        coordinates: [],
-        length: 4,
-        hitCount: 0,
-      },
-      AircraftCarrier: {
-        coordinates: [],
-        length: 5,
-        hitCount: 0,
-      },
-    };
-    teamsArray.push(team);
-  }
-  return teamsArray;
-}
+function createTeam() {
+  numberOfTeams++; // Increment the number of teams
+  selectMode = true;
+  // Prompt the user to enter a team name
+  let teamName = prompt("Enter the name of Team " + numberOfTeams);
 
-function arrangeBoatsManually(numberOfShips) {
-  // Assume the boats are arranged manually
-
-  const container = document.getElementById("shipPlacement");
-  container.innerHTML = ""; // Clear existing inputs
-  displayMessage = createElement("p");
-  displayMessage.textContent =
-    "Here's where we figure out the placement of ships.";
-  container.appendChild(displayMessage);
-
-  for (let i = 0; i < numberOfTeams; i++) {
-    // Array of boat types
-    const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
-
-    for (const boatType of boatTypes) {
-      let boatLength = teamsArray[i][boatType].length; // Get the length for the current boat
-      let validPlacement = false;
-    }
+  // If the user doesn't enter a name, use a default one
+  if (!teamName) {
+    teamName = "Team " + numberOfTeams; // Default team name
   }
 
-  addGhostShip();
-  displayTeamFilter();
-}
+  // Create a new team object
+  let team = {
+    id: numberOfTeams,
+    name: teamName,
+    score: 0,
+    numberOfQuestionsRight: 0,
+    numberOfTurns: 0,
+    questionsRightTotal: 0,
+    color: colors[(numberOfTeams - 1) % colors.length],
+    PTBoat: {
+      coordinates: [],
+      length: 2,
+      hitCount: 0,
+    },
+    Submarine: {
+      coordinates: [],
+      length: 3,
+      hitCount: 0,
+    },
+    Cruiser: {
+      coordinates: [],
+      length: 3,
+      hitCount: 0,
+    },
+    Destroyer: {
+      coordinates: [],
+      length: 4,
+      hitCount: 0,
+    },
+    Battleship: {
+      coordinates: [],
+      length: 4,
+      hitCount: 0,
+    },
+    AircraftCarrier: {
+      coordinates: [],
+      length: 5,
+      hitCount: 0,
+    },
+  };
 
-function addGhostShip() {
-  const ghostshipLength = 3;
-  let validPlacement = false;
-  const boatTypes = arrayOfBoats.slice(0, numberOfShips); // Only use the first 'numberOfShips' types
-  while (!validPlacement) {
+  // For each boat, prompt the user for coordinates and store them
+  let whichShip = 0;
+  while (whichShip < numberOfShips) {
+    const boatType = arrayOfBoats[whichShip];
+    const boatLength = arrayOfBoatLengths[whichShip];
+    let coordinatesArray = [];
     let row,
       col = 0;
-    let direction = coinFlip();
 
-    if (direction === "Horizontal") {
-      row = Math.floor(Math.random() * (grid - 1)) + 1;
-      col = Math.floor(Math.random() * (grid - ghostshipLength - 1)) + 1;
-    } else {
-      // Vertical
-      row = Math.floor(Math.random() * (grid - ghostshipLength - 1)) + 1;
-      col = Math.floor(Math.random() * (grid - 1)) + 1;
-    }
+    // Prompt for the coordinates of the current boat, replace prompt with click
+    const coordinatesInput = prompt(
+      `Enter the upper left coordinates for the ${boatType} (e.g., A1, B3, etc.)`
+    );
 
-    if (!checkForConflict(row, col, ghostshipLength, direction, boatTypes)) {
-      validPlacement = true; // Found a valid placement
-      if (direction === "Horizontal") {
-        for (let j = 0; j < ghostshipLength; j++) {
-          changeCellColor(row, col + j, "white"); // Change to a different color for visibility
-          ghostshipCoord.push([row, col + j]);
+    if (coordinatesInput) {
+      // Convert the input into an array of coordinates (assuming comma-separated inputs)
+      coordinatesArray = coordinatesInput.split(",").map((coord) => {
+        row =
+          coord.charAt(0).toUpperCase().charCodeAt(0) - "A".charCodeAt(0) + 1; // Convert letter to row
+        col = parseInt(coord.slice(1), 10); // Extract column number
+        return [row, col]; // Return as an array of [row, col]
+      });
+
+      const boatDirection = prompt(
+        'Enter "h" for horizontal, "v" for vertical'
+      );
+      // Store the coordinates in the boat's object
+      if (boatDirection == "h") {
+        for (i = 1; i < boatLength; i++) {
+          coordinatesArray.push([row, col + i]);
         }
-      } else {
-        // Vertical
-        for (let j = 0; j < ghostshipLength; j++) {
-          changeCellColor(row + j, col, "white");
-          ghostshipCoord.push([row + j, col]);
+      } else if (boatDirection == "v") {
+        for (i = 1; i < boatLength; i++) {
+          coordinatesArray.push([row + i, col]);
         }
       }
+      team[boatType].coordinates = coordinatesArray;
+    } else {
+      console.error("Invalid coordinates input for " + boatType);
     }
+
+    // Move to the next ship
+    whichShip++;
   }
+
+  colorSelectedTeam(team);
+  // Push the new team to the teams array
+  teamsArray.push(team);
+
+  // Optionally, log the team array for debugging
+  console.log(teamsArray);
+  selectMode = false;
 }
 
-function displayTeamFilter() {
-  const container = document.getElementById("teamFilter");
-  container.innerHTML = ""; // Clear previous content
-  // Add a border to the container
-  container.style.border = "2px solid #000";
+function arrangeBoatsManually() {
+  const container = document.getElementById("shipPlacement");
+  container.innerHTML = ""; // Clear existing inputs
 
-  // Create label for filter
-  const selectTeamLabel = document.createElement("label");
-  selectTeamLabel.textContent = "Team Filter";
-  container.appendChild(selectTeamLabel);
+  // Create and display a message
+  let displayMessage = document.createElement("p");
+  displayMessage.textContent = "Add team";
+  container.appendChild(displayMessage);
 
-  // Create a select element
-  const selectTeam = document.createElement("select");
+  // Create the button
+  let addTeamButton = document.createElement("button");
+  addTeamButton.textContent = "Create Team"; // Optional: Add text to the button
 
-  // Create and add "All" option
-  const allOption = document.createElement("option");
-  allOption.value = "all"; // or any value you prefer
-  allOption.textContent = "All";
-  selectTeam.appendChild(allOption);
-  // Create and add "All" option
-  const ghostOption = document.createElement("option");
-  ghostOption.value = "ghostShip"; // or any value you prefer
-  ghostOption.textContent = "Ghost Ship";
-  selectTeam.appendChild(ghostOption);
+  // Add event listener for the button's click event
+  addTeamButton.addEventListener("click", function () {
+    // Create a new team
+    createTeam();
 
-  // Populate the dropdown with teams
-  for (let i = 0; i < numberOfTeams; i++) {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = teamsArray[i].name;
-    selectTeam.appendChild(option);
-  }
+    // Clear the container and display updated list of teams
+    container.innerHTML = ""; // Clear the previous content
+    container.appendChild(displayMessage); // Re-add the message
 
-  // Add an event listener
-  selectTeam.addEventListener("change", function () {
-    const selectedTeam = this.value;
-    if (selectedTeam == "all") {
-      addTable();
-      const coordinatesDisplay = document.getElementById("shipCoordinates");
-      coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
-      for (i = 0; i < numberOfTeams; i++) {
-        colorSelectedTeam(i);
-      }
-
-      ghostshipCoord.forEach((coord) => {
-        changeCellColor(coord[0], coord[1], "white"); // Adjust the color for visibility
-      });
-    } else if (selectedTeam == "ghostShip") {
-      const coordinatesDisplay = document.getElementById("shipCoordinates");
-      coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
-      addTable();
-      ghostshipCoord.forEach((coord) => {
-        changeCellColor(coord[0], coord[1], "white"); // Adjust the color for visibility
-      });
-      displayShipCoordinates(selectedTeam);
-    } else {
-      addTable();
-      colorSelectedTeam(selectedTeam);
-      displayShipCoordinates(selectedTeam); // Show ship coordinates for selected team
+    // Display the updated list of teams
+    for (let i = 0; i < teamsArray.length; i++) {
+      let displayTeam = document.createElement("p");
+      displayTeam.textContent = teamsArray[i].name;
+      container.appendChild(displayTeam);
     }
+
+    // Append the "Create Team" button again after displaying the teams
+    container.appendChild(addTeamButton);
   });
-  // Create a display area for ship coordinates
-  const coordinatesDisplay = document.createElement("div");
-  coordinatesDisplay.id = "shipCoordinates";
-  container.appendChild(coordinatesDisplay);
 
-  // Append the select element to the container
-  container.appendChild(selectTeam);
+  // Append the "Create Team" button initially
+  container.appendChild(addTeamButton);
 
-  //add a gameplay button
-  const gameButton = document.getElementById("gameButton");
-  const startGame = document.createElement("button");
-  startGame.id = "startGame";
-  startGame.textContent = "Begin the Game";
-  gameButton.appendChild(startGame);
-  gameButton.addEventListener("click", game);
+  //Create the button to start the game - user decides when they are done creating teams
+  let gameButton = document.getElementById("gameButton");
+  let startGameButton = document.createElement("button");
+  startGameButton.textContent = "Start the Game";
+
+  //Add event listener for the start game button's click event
+  startGameButton.addEventListener("click", () => {
+    container.innerHTML = "";
+    gameButton.innerHTML = "";
+    gameplay = true;
+    game();
+  });
+  gameButton.appendChild(startGameButton);
 }
 
 function displayShipCoordinates(selectedTeam) {
   const coordinatesDisplay = document.getElementById("shipCoordinates");
   coordinatesDisplay.innerHTML = ""; // Clear previous coordinates
-  if (selectedTeam == "ghostShip") {
-    const coordinates = ghostshipCoord;
-    if (coordinates.length > 0) {
-      const coordinatesText = `Ghost Ship: ${coordinates
-        .map((coord) => `(${String.fromCharCode(coord[0] + 64)}, ${coord[1]})`)
-        .join(", ")}`;
-      const paragraph = document.createElement("p");
-      paragraph.textContent = coordinatesText; // Set the text content
-      coordinatesDisplay.appendChild(paragraph); // Append to the display area
-    }
-  } else {
-    const team = teamsArray[selectedTeam];
+  const team = teamsArray[selectedTeam];
+  console.log(`team in displayShipCoordinates is ${team}`);
+  // Loop through each ship type and display its coordinates
+  for (const boatType in team) {
+    if (
+      team.hasOwnProperty(boatType) &&
+      Array.isArray(team[boatType].coordinates)
+    ) {
+      const coordinates = team[boatType].coordinates;
 
-    // Loop through each ship type and display its coordinates
-    for (const boatType in team) {
-      if (
-        team.hasOwnProperty(boatType) &&
-        Array.isArray(team[boatType].coordinates)
-      ) {
-        const coordinates = team[boatType].coordinates;
-
-        if (coordinates.length > 0) {
-          const coordinatesText = `${boatType}: ${coordinates
-            .map(
-              (coord) => `(${String.fromCharCode(coord[0] + 64)}, ${coord[1]})`
-            )
-            .join(", ")}`;
-          const paragraph = document.createElement("p");
-          paragraph.textContent = coordinatesText; // Set the text content
-          coordinatesDisplay.appendChild(paragraph); // Append to the display area
-        }
+      if (coordinates.length > 0) {
+        const coordinatesText = `${boatType}: ${coordinates
+          .map(
+            (coord) => `(${String.fromCharCode(coord[0] + 64)}, ${coord[1]})`
+          )
+          .join(", ")}`;
+        const paragraph = document.createElement("p");
+        paragraph.textContent = coordinatesText; // Set the text content
+        coordinatesDisplay.appendChild(paragraph); // Append to the display area
       }
     }
   }
 }
 
 function colorSelectedTeam(selectedTeam) {
+  console.log(selectedTeam);
   // Get the color of the selected team
-  const teamColor = teamsArray[selectedTeam].color;
+  const teamColor = selectedTeam.color;
 
   // Loop through the boat types for the selected team
-  for (const boatType in teamsArray[selectedTeam]) {
-    const boat = teamsArray[selectedTeam][boatType];
+  for (const boatType in selectedTeam) {
+    const boat = selectedTeam[boatType];
 
     // Check if coordinates exist and are an array
     if (Array.isArray(boat.coordinates)) {
@@ -383,73 +292,11 @@ function colorSelectedTeam(selectedTeam) {
   }
 }
 
-function coinFlip() {
-  return Math.random() < 0.5 ? "Horizontal" : "Vertical";
-}
-
 function changeCellColor(row, col, color) {
   const cell = gridTable.rows[row].cells[col];
   cell.style.backgroundColor = color;
 }
 
-function checkForConflict(row, col, boatLength, direction, boatTypes) {
-  for (let i = 0; i < numberOfTeams; i++) {
-    for (const boatType of boatTypes) {
-      const existingCoordinates = teamsArray[i][boatType].coordinates;
-
-      for (let j = 0; j < boatLength; j++) {
-        let currentCoord;
-
-        if (direction === "Horizontal") {
-          currentCoord = [row, col + j];
-        } else {
-          // Vertical
-          currentCoord = [row + j, col];
-        }
-
-        // Check if the current coordinate is in the existing coordinates
-        for (const existingCoord of existingCoordinates) {
-          if (
-            currentCoord[0] === existingCoord[0] &&
-            currentCoord[1] === existingCoord[1]
-          ) {
-            return true; // Conflict found
-          }
-        }
-      }
-    }
-  }
-  return false; // No conflict found
-}
-
-let highlightMode = "horizontal"; // Default is horizontal
-
-// Function to update the highlight mode based on the key pressed
-function handleKeyPress(event) {
-  if (event.key === "h") {
-    highlightMode = "horizontal"; // Set highlight mode to horizontal
-    console.log("Highlight mode set to horizontal");
-  } else if (event.key === "v") {
-    highlightMode = "vertical"; // Set highlight mode to vertical
-    console.log("Highlight mode set to vertical");
-  }
-
-  // Reset highlight color for all cells when mode changes
-  resetHighlightedCells();
-}
-
-// Function to reset the background color of all cells
-function resetHighlightedCells() {
-  let cells = gridTable.getElementsByTagName("td");
-  for (let cell of cells) {
-    cell.style.backgroundColor = "";
-  }
-}
-
-// Listen for the 'keydown' event to switch between horizontal and vertical mode
-document.addEventListener("keydown", handleKeyPress);
-
-// Function to add the table with mouseover functionality
 function addTable() {
   let myTableDiv = document.getElementById("myDynamicTable");
   while (myTableDiv.firstChild) {
@@ -469,6 +316,7 @@ function addTable() {
       let td = document.createElement("TD");
       let th = document.createElement("TH");
       let letter = String.fromCharCode(i + 64);
+
       if (i == 0 && j == 0) {
         th.appendChild(document.createTextNode(""));
         tr.appendChild(th);
@@ -485,78 +333,6 @@ function addTable() {
       } else {
         td.appendChild(document.createTextNode(`${letter}${j}`));
         tr.appendChild(td);
-
-        // Add mouseover and mouseout event listeners to each cell
-        td.addEventListener("mouseover", function () {
-          // Highlight the current cell
-          td.style.backgroundColor = "#f0f0f0";
-
-          if (highlightMode === "horizontal") {
-            // Highlight the next cell in the row (if it exists)
-            let nextCell = td.nextElementSibling;
-            if (nextCell) {
-              nextCell.style.backgroundColor = "#f0f0f0";
-            }
-          } else if (highlightMode === "vertical") {
-            // Highlight the cell below (if it exists)
-            let nextRow = gridTable.rows[i + 1]; // Get the next row
-            if (nextRow) {
-              let nextCellInRow = nextRow.cells[j]; // Get the cell below
-              if (nextCellInRow) {
-                nextCellInRow.style.backgroundColor = "#f0f0f0";
-              }
-            }
-          }
-        });
-
-        td.addEventListener("mouseout", function () {
-          // Reset the current cell background color
-          td.style.backgroundColor = "";
-
-          if (highlightMode === "horizontal") {
-            // Reset the next cell background color (if it exists)
-            let nextCell = td.nextElementSibling;
-            if (nextCell) {
-              nextCell.style.backgroundColor = "";
-            }
-          } else if (highlightMode === "vertical") {
-            // Reset the cell below (if it exists)
-            let nextRow = gridTable.rows[i + 1]; // Get the next row
-            if (nextRow) {
-              let nextCellInRow = nextRow.cells[j]; // Get the cell below
-              if (nextCellInRow) {
-                nextCellInRow.style.backgroundColor = "";
-              }
-            }
-          }
-        });
-      }
-    }
-  }
-
-  // Loop through rows and columns to assign classes to cells in quadrants
-  for (let i = 1; i <= gridSize; i += quadrantSize + remainder) {
-    for (let j = 1; j <= gridSize; j += quadrantSize + remainder) {
-      // Calculate quadrant class (either 0, 1, 2, or 3)
-      let quadrantClass;
-      if (i < quadrantSize + remainder) {
-        quadrantClass = j < quadrantSize + remainder ? 0 : 1; // Top-left: 0, Top-right: 1
-      } else {
-        quadrantClass = j < quadrantSize + remainder ? 2 : 3; // Bottom-left: 2, Bottom-right: 3
-      }
-
-      // Iterate through the cells in the quadrant
-      for (let x = 0; x < quadrantSize + remainder; x++) {
-        for (let y = 0; y < quadrantSize + remainder; y++) {
-          // Ensure we're within the bounds of the grid
-          if (i + x <= gridSize && j + y <= gridSize) {
-            const quadrantCell = gridTable.rows[i + x].cells[j + y];
-            if (quadrantCell) {
-              // Add the class for the current quadrant
-              quadrantCell.classList.add(`quadrant-${quadrantClass}`);
-            }
-          }
-        }
       }
     }
   }
@@ -565,53 +341,29 @@ function addTable() {
   return gridTable; // Optional: still return it if needed
 }
 
-document
-  .getElementById("numberOfTeams")
-  .addEventListener("change", function () {
-    const selectedValue = parseInt(this.value); // Get the selected value
-    numberOfTeams = selectedValue;
-    document.getElementById(
-      "selectedNumberOfTeams"
-    ).textContent = `${selectedValue} teams`;
-  });
-
 gridTable = addTable();
 
-function game() {
-  gameplay = true;
+async function game() {
+  // Start the first round and create turns for the first round
+  await turnCreator(); // Await turnCreator to fill turnsArray initially
+
+  // Randomly pick a team for the current turn
+  currentTurnIndex = Math.floor(Math.random() * turnsArray.length);
+  currentTeamID = turnsArray[currentTurnIndex]; // Get the team ID from turnsArray
+  currentTeam = teamsArray.find((team) => team.id === currentTeamID);
+
   const menu = document.getElementById("menu");
-  menu.innerHTML = ""; // Clear previous menu content
 
   const roundMessage = document.createElement("p");
   roundMessage.textContent = `Round ${round}`;
 
   addTable(); // Function to add the game table
+  action.style = "display:inline";
+  action.textContent = `Team ${currentTeam.name}, pick a target!`;
 
-  //function to prompt how many each team got correct
-  //function to convert correct answers into turns
-  //function to place team names into array based on number of turns
-
-  //function that randomly chooses turn, teamTurn = math.random*numberOfTurns, and removes teams turn from array
-
-  const action = document.createElement("p");
-  action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
-  menu.appendChild(roundMessage);
-  menu.appendChild(action);
-
-  const input = document.createElement("input");
-  input.type = "text"; // Set input type to text
-  input.maxLength = 3; // Limit input to three characters
-  input.placeholder = "Enter target (e.g., A1)";
-  menu.appendChild(input);
-
-  const button = document.createElement("button");
+  input.style = "display:inline";
+  button.style = "display: inline";
   button.textContent = "Fire!";
-  menu.appendChild(button);
-
-  // Create fire results div
-  const fireResults = document.createElement("div");
-  fireResults.id = "fireResults";
-  menu.appendChild(fireResults);
 
   // Add event listener to the button
   button.addEventListener("click", function () {
@@ -624,15 +376,23 @@ function game() {
           "This target has already been fired upon. Please choose a different one."
         );
       } else {
+        turnsArray.splice(currentTurnIndex, 1);
         analyzeHitOrMiss(target); // Call your function to analyze the hit or miss
         usedTargets.push(target); // Add the target to the used targets array
-        action.innerHTML = "";
-        action.textContent = `Team ${teamsArray[teamTurn].name}, pick a target!`;
+        if (turnsArray.length > 0) {
+          action.innerHTML = "";
+          action.textContent = `Team ${currentTeam.name}, pick a target!`;
 
-        input.value = ""; // Clear the input after submission
+          input.value = ""; // Clear the input after submission
 
-        roundMessage.innterHTML = "";
-        roundMessage.textContent = `Round ${round}`;
+          roundMessage.innerHTML = "";
+          roundMessage.textContent = `Round ${round}`;
+        } else {
+          fireResults.innerHTML = "";
+          action.innerHTML = "";
+
+          roundMessage.innerHTML = "";
+        }
       }
     } else {
       alert("Please enter exactly a letter and a number (e.g., A1).");
@@ -668,7 +428,72 @@ function game() {
   });
 }
 
-function analyzeHitOrMiss(target) {
+function turnCreator() {
+  return new Promise((resolve) => {
+    const container = document.getElementById("questionsCorrect");
+    container.innerHTML = ""; // Clear existing inputs
+
+    const display = document.createElement("p");
+    display.textContent = "Enter the number of Questions correct for each team";
+    container.appendChild(display);
+
+    for (let i = 0; i < numberOfTeams; i++) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.placeholder = teamsArray[i].name;
+      input.className = "team-questions-right";
+      input.id = `teamName${i + 1}`;
+      input.style.backgroundColor = colors[i % colors.length]; // Set the background color
+      container.appendChild(input);
+
+      // Initialize the numberOfQuestionsRight and team's Turns
+      teamsArray[i].numberOfQuestionsRight = 0;
+      teamsArray[i].numberOfTurns = 0;
+
+      // Handle the input value after the user enters data and updates the input
+      input.addEventListener("input", function () {
+        // Get the value entered in the input and parse it to an integer
+        const number = parseInt(input.value) || 0; // If it's not a valid number, default to 0
+
+        // Update the numberOfQuestionsRight with the entered value
+        teamsArray[i].numberOfQuestionsRight = number;
+        teamsArray[i].questionsRightTotal += number;
+
+        // Recalculate team's turns based on the updated numberOfQuestionsRight
+        teamsArray[i].numberOfTurns = Math.ceil(
+          teamsArray[i].numberOfQuestionsRight / 2
+        );
+
+        // Add team to turnsArray
+        for (let j = 0; j < teamsArray[i].numberOfTurns; j++) {
+          turnsArray.push(teamsArray[i].id);
+        }
+
+        console.log(
+          `Team ${teamsArray[i].name} has ${teamsArray[i].numberOfTurns} turns.`
+        );
+        console.log(`Here's the turns: ${turnsArray}`);
+      });
+    }
+
+    // Create the finalize button
+    const finalizeButton = document.createElement("button");
+    finalizeButton.id = "finalizeTeamsButton";
+    finalizeButton.textContent = "Enter";
+    container.appendChild(finalizeButton);
+
+    // Add event listener for the finalize button
+    finalizeButton.addEventListener("click", function () {
+      console.log(teamsArray); // Log the updated teams array with correct data
+      finalizeButton.disabled = true;
+      finalizeButton.style.display = "none";
+      container.innerHTML = ""; // Clear the input container after finalizing
+      resolve(); // Resolve the promise to indicate that the user has finished
+    });
+  });
+}
+
+async function analyzeHitOrMiss(target) {
   const letter = target.charAt(0);
   const number = parseInt(target.slice(1), 10);
   const row = letter.charCodeAt(0) - "A".charCodeAt(0) + 1;
@@ -680,7 +505,7 @@ function analyzeHitOrMiss(target) {
     let hit = false;
     let sunkMsg = "";
 
-    // Check through each team's ships... Don't forget the ghost ship!!!
+    // Check through each team's ships...
     for (const team of teamsArray) {
       for (const boatType in team) {
         const coordinates = team[boatType].coordinates;
@@ -701,24 +526,11 @@ function analyzeHitOrMiss(target) {
         if (hit) break; // Break out if hit is found
       }
 
-      // Check if the ghost ship was hit
-      if (
-        ghostshipCoord.some((coord) => coord[0] === row && coord[1] === column)
-      ) {
-        hit = true; // Ghost ship hit
-        ghostshipHitCount++; // Increment the ghost ship hit count
-        sunkMsg =
-          ghostshipHitCount >= ghostshipCoord.length
-            ? "The Ghost Ship has been sunk!"
-            : ""; // Check if the ghost ship is sunk
-        break; // Exit the loop after a hit
-      }
-
       if (hit) break; // Break out if hit is found
     }
 
     // Change cell color based on hit or miss
-    const fireResults = document.getElementById("fireResults");
+
     fireResults.innerHTML = ""; // Clear previous results
     if (hit) {
       changeCellColor(row, column, "red"); // Color the cell red for a hit
@@ -738,7 +550,23 @@ function analyzeHitOrMiss(target) {
       fireResults.appendChild(message);
     }
 
-    teamTurn < numberOfTeams - 1 ? teamTurn++ : ((teamTurn = 0), round++);
+    if (turnsArray.length > 0) {
+      currentTurnIndex = Math.floor(Math.random() * turnsArray.length);
+      currentTeamID = turnsArray[currentTurnIndex];
+      currentTeam = teamsArray.find((team) => team.id === currentTeamID);
+    } else {
+      console.log(turnsArray.length);
+      round++;
+      input.style = "display:none";
+      action.style = "display:none";
+      button.style = "display:none";
+      await turnCreator();
+      input.innerHTML = "";
+      input.style = "display:inline";
+      action.style = "display:inline";
+      action.textContent = `Team ${currentTeam.name}, pick a target!`;
+      button.style = "display:inline";
+    }
   }
 }
 
@@ -761,6 +589,7 @@ function score() {
         team.score = team.score + 7;
       }
     }
+    team.score = team.score + team.questionsRightTotal;
   }
   for (i = 0; i < numberOfTeams; i++) {
     const menu = document.getElementById("menu");

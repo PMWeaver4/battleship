@@ -9,7 +9,7 @@
     <link href="style/style.css" rel="stylesheet"/>
   </head>
   <body>
-      <header>Welcome to Convoy Killer!</header>
+      <header>Convoy Killer!</header>
     
     <div class="container">
 
@@ -29,36 +29,38 @@
             </select>
             <button id="lockGridButton" onclick="lockGrid()">Lock Grid Size</button> -->
        
-    <p id="selectedGrid">23 x 23 board</p>
+    <!-- <p id="selectedGrid">23 x 23 board</p> -->
 
-    <label for="Number of Teams" id="numberOfTeamsLabel">Choose the number of Teams:</label>
-    <select id="numberOfTeams">
-        <option value="2">default</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-    </select>
-    <button id="lockTeamButton" onclick="lockTeams()">Lock the number of teams.</button>
-    <p id="selectedNumberOfTeams">2 Teams</p>
+
+    <div id="numberOfShips">
+      <button id="start" onclick="chooseShips()">Set up</button>
+      
+    </div>
+    <!-- <button id="lockTeamButton" onclick="lockTeams()">Lock the number of teams.</button>
+    <p id="selectedNumberOfTeams">2 Teams</p> -->
     <div id="nameTeams">
         
     </div>
-    <div id="numberOfShips">
 
-    </div>
     <div id="shipPlacement">
       
     </div>
-    <div id="teamFilter">
+    <div id="shipPlaceDisplay">
+      
+    </div>
+    <div id="shipCoordinates">
 
     </div>
+    <div id="questionsCorrect">
+
+    </div>
+    <p id="action" style ="display:none"></p>
+    <input id="input" type="text" maxlength="3" placeholder="Enter target (e.g., A1)" style = "display:none">
+    <button id="button" style="display:none">Fire!</button>
     <div id="fireResults">
       
     </div>
+    
     <div id="gameButton"></div>
     <div id="gameEnd"></div>
   </div>

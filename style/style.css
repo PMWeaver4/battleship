@@ -46,15 +46,19 @@ table {
     /* width: 100%;  */
     /* Table takes full width of its container */
   }
+
+
   
   th, td {
     padding: 1px; /* Space inside cells */
     text-align: center; /* Center text */
     width: 4vh;
+  
     
 }
-tr {
+tr,td {
       height: 4vh;
+      background-color: grey
   }
 
   td.hovered {
