@@ -19,8 +19,17 @@ const fireResults = document.getElementById("fireResults");
 const input = document.getElementById("input");
 const action = document.getElementById("action");
 const button = document.getElementById("button");
+const menuHead = document.getElementById("menuHead");
 
-colors = ["Blue", "Black", "Orange", "Yellow", "Green", "Red", "Aqua"];
+colors = [
+  "rgba(0, 0, 255, 0.6)", // Blue
+  "rgba(0, 0, 0, 0.6)", // Black
+  "rgba(255, 165, 0, 0.6)", // Orange
+  "rgba(255, 255, 0, 0.6)", // Yellow
+  "rgba(0, 255, 0, 0.6)", // Green
+  "rgba(255, 0, 0, 0.6)", // Red
+  "rgba(0, 255, 255, 0.6)", // Aqua
+];
 
 const arrayOfBoats = [
   "PTBoat",
@@ -69,15 +78,21 @@ function chooseShips() {
 
   // Add event listener for the finalize button
   finalizeButton.addEventListener("click", function () {
-    finalizeButton.disabled = true;
-    selectElement.disabled = true;
-    finalizeButton.style.display = "none";
-    selectElement.style.display = "none";
-    // arrangeBoats(numberOfShips);
-    //need to add a function to place the boats manually - ensure that hit or miss records hit on multiple boats if they overlap
-    container.innerHTML = ""; // Clear existing inputs
+    const userConfirmed = window.confirm(
+      `The number of ships each team has is ${numberOfShips}. Is this correct?`
+    );
 
-    arrangeBoatsManually();
+    if (userConfirmed) {
+      finalizeButton.disabled = true;
+      selectElement.disabled = true;
+      finalizeButton.style.display = "none";
+      selectElement.style.display = "none";
+      //need to add a function to place the boats manually - ensure that hit or miss records hit on multiple boats if they overlap
+      container.innerHTML = ""; // Clear existing inputs
+      arrangeBoatsManually();
+    } else {
+      console.log("Number of ships not yet confirmed.");
+    }
   });
 }
 
@@ -211,9 +226,31 @@ function arrangeBoatsManually() {
 
     // Display the updated list of teams
     for (let i = 0; i < teamsArray.length; i++) {
+      let teamDisplay = document.createElement("div"); // Create a div for each team
+
+      teamDisplay.style.display = "flex";
+      teamDisplay.style.alignItems = "center";
+
+      // Create the team name paragraph
       let displayTeam = document.createElement("p");
-      displayTeam.textContent = teamsArray[i].name;
-      container.appendChild(displayTeam);
+      displayTeam.textContent = `${i + 1}: ${teamsArray[i].name}`;
+      displayTeam.style.marginRight = "10px"; // Space between name and button
+
+      // Create the edit button
+      let editButton = document.createElement("button");
+      editButton.textContent = "Edit";
+
+      // Add event listener to the "Edit" button to show input fields for editing
+      editButton.addEventListener("click", function () {
+        editTeam(teamsArray[i], i); // Call editTeam with the team and its index
+      });
+
+      // Append team name and edit button to the div
+      teamDisplay.appendChild(displayTeam);
+      teamDisplay.appendChild(editButton);
+
+      // Append the team div to the container
+      container.appendChild(teamDisplay);
     }
 
     // Append the "Create Team" button again after displaying the teams
@@ -222,20 +259,58 @@ function arrangeBoatsManually() {
 
   // Append the "Create Team" button initially
   container.appendChild(addTeamButton);
+  if (!gameButton.querySelector("button")) {
+    //Create the button to start the game - user decides when they are done creating teams
+    let gameButton = document.getElementById("gameButton");
+    let startGameButton = document.createElement("button");
+    startGameButton.textContent = "Start the Game";
 
-  //Create the button to start the game - user decides when they are done creating teams
-  let gameButton = document.getElementById("gameButton");
-  let startGameButton = document.createElement("button");
-  startGameButton.textContent = "Start the Game";
+    //Add event listener for the start game button's click event
+    startGameButton.addEventListener("click", () => {
+      const userConfirmed = window.confirm(
+        "Are you sure you want to start the game?"
+      );
 
-  //Add event listener for the start game button's click event
-  startGameButton.addEventListener("click", () => {
-    container.innerHTML = "";
-    gameButton.innerHTML = "";
-    gameplay = true;
-    game();
+      if (userConfirmed) {
+        container.innerHTML = "";
+        gameButton.innerHTML = "";
+        gameplay = true;
+        game();
+      } else {
+        console.log("Game start cancelled.");
+      }
+    });
+    gameButton.appendChild(startGameButton); // Append the start game button only if it doesn't exist
+  }
+}
+
+function editTeam(team, teamIndex) {
+  const container = document.getElementById("shipPlacement");
+  container.innerHTML = ""; // Clear the container
+
+  // Create a message for editing
+  let editMessage = document.createElement("p");
+  editMessage.textContent = "Edit Team: " + team.name;
+  container.appendChild(editMessage);
+
+  // Create input field for the new team name
+  let nameInput = document.createElement("input");
+  nameInput.value = team.name; // Set current team name as input value
+
+  // Create a save button to save the changes
+  let saveButton = document.createElement("button");
+  saveButton.textContent = "Save Changes";
+
+  // Add event listener to save the edited details
+  saveButton.addEventListener("click", function () {
+    team.name = nameInput.value; // Update team name
+    // After saving, return to the main display of teams
+    arrangeBoatsManually();
   });
-  gameButton.appendChild(startGameButton);
+
+  // Append input fields and save button to the container
+  container.appendChild(nameInput);
+  container.appendChild(saveButton);
 }
 
 function displayShipCoordinates(selectedTeam) {
@@ -354,8 +429,8 @@ async function game() {
 
   const menu = document.getElementById("menu");
 
-  const roundMessage = document.createElement("p");
-  roundMessage.textContent = `Round ${round}`;
+  menuHead.innerHTML = "";
+  menuHead.textContent = `Round ${round}`;
 
   addTable(); // Function to add the game table
   action.style = "display:inline";
@@ -384,14 +459,9 @@ async function game() {
           action.textContent = `Team ${currentTeam.name}, pick a target!`;
 
           input.value = ""; // Clear the input after submission
-
-          roundMessage.innerHTML = "";
-          roundMessage.textContent = `Round ${round}`;
         } else {
-          fireResults.innerHTML = "";
           action.innerHTML = "";
-
-          roundMessage.innerHTML = "";
+          input.value = ""; // Clear the input after submission
         }
       }
     } else {
@@ -437,6 +507,12 @@ function turnCreator() {
     display.textContent = "Enter the number of Questions correct for each team";
     container.appendChild(display);
 
+    // Create an array to temporarily store the number of questions correct for each team
+    const tempQuestionsArray = [];
+
+    // Create an array to temporarily store the number of turns per team
+    const tempTurnsArray = [];
+
     for (let i = 0; i < numberOfTeams; i++) {
       const input = document.createElement("input");
       input.type = "number";
@@ -450,29 +526,22 @@ function turnCreator() {
       teamsArray[i].numberOfQuestionsRight = 0;
       teamsArray[i].numberOfTurns = 0;
 
+      // Temporarily store the questions correct and turns
+      tempQuestionsArray[i] = 0;
+      tempTurnsArray[i] = 0;
+
       // Handle the input value after the user enters data and updates the input
       input.addEventListener("input", function () {
-        // Get the value entered in the input and parse it to an integer
+        // Temporarily store the value entered in the input
         const number = parseInt(input.value) || 0; // If it's not a valid number, default to 0
+        tempQuestionsArray[i] = number; // Save it in the temp array for later use
 
-        // Update the numberOfQuestionsRight with the entered value
-        teamsArray[i].numberOfQuestionsRight = number;
-        teamsArray[i].questionsRightTotal += number;
-
-        // Recalculate team's turns based on the updated numberOfQuestionsRight
-        teamsArray[i].numberOfTurns = Math.ceil(
-          teamsArray[i].numberOfQuestionsRight / 2
-        );
-
-        // Add team to turnsArray
-        for (let j = 0; j < teamsArray[i].numberOfTurns; j++) {
-          turnsArray.push(teamsArray[i].id);
-        }
+        // Update the team's turns based on the temporary input value
+        tempTurnsArray[i] = Math.ceil(tempQuestionsArray[i] / 2);
 
         console.log(
-          `Team ${teamsArray[i].name} has ${teamsArray[i].numberOfTurns} turns.`
+          `Team ${teamsArray[i].name} temporarily has ${tempTurnsArray[i]} turns.`
         );
-        console.log(`Here's the turns: ${turnsArray}`);
       });
     }
 
@@ -484,7 +553,21 @@ function turnCreator() {
 
     // Add event listener for the finalize button
     finalizeButton.addEventListener("click", function () {
+      // Update the actual teamsArray with the values stored temporarily
+      for (let i = 0; i < numberOfTeams; i++) {
+        teamsArray[i].numberOfQuestionsRight = tempQuestionsArray[i];
+        teamsArray[i].questionsRightTotal += tempQuestionsArray[i];
+        teamsArray[i].numberOfTurns = tempTurnsArray[i];
+
+        // Push the team's turns to turnsArray
+        for (let j = 0; j < teamsArray[i].numberOfTurns; j++) {
+          turnsArray.push(teamsArray[i].id);
+        }
+      }
+
       console.log(teamsArray); // Log the updated teams array with correct data
+      console.log(`Here's the turns: ${turnsArray}`);
+
       finalizeButton.disabled = true;
       finalizeButton.style.display = "none";
       container.innerHTML = ""; // Clear the input container after finalizing
@@ -502,8 +585,8 @@ async function analyzeHitOrMiss(target) {
   if (row < 1 || row >= grid || column < 1 || column >= grid) {
     alert("Out of range");
   } else {
-    let hit = false;
-    let sunkMsg = "";
+    let hits = []; // Track all hits (multiple players can hit the same spot)
+    let sunkMsgs = []; // Store any sunk messages to display after all checks are done
 
     // Check through each team's ships...
     for (const team of teamsArray) {
@@ -514,31 +597,31 @@ async function analyzeHitOrMiss(target) {
         if (Array.isArray(coordinates)) {
           for (const coord of coordinates) {
             if (coord[0] === row && coord[1] === column) {
-              hit = true; // A hit is found
               team[boatType].hitCount++; // Increment the hit count for the ship
-              sunkMsg = checkIfSunk(team, boatType)
+              hits.push(team); // Record that this team hit the target
+              const sunkMsg = checkIfSunk(team, boatType)
                 ? `${team.name}'s ${boatType} was sunk!`
-                : ""; // Check if the ship is sunk
-              break; // Exit the loop after a hit
+                : "";
+              if (sunkMsg) {
+                sunkMsgs.push(sunkMsg); // Add sunk message to array if ship is sunk
+              }
+              // No break here, continue checking all teams and boats
             }
           }
         }
-        if (hit) break; // Break out if hit is found
       }
-
-      if (hit) break; // Break out if hit is found
     }
 
     // Change cell color based on hit or miss
-
     fireResults.innerHTML = ""; // Clear previous results
-    if (hit) {
+    if (hits.length > 0) {
       changeCellColor(row, column, "red"); // Color the cell red for a hit
       const message = document.createElement("p");
       message.textContent = `${target} was a HIT!`;
       fireResults.appendChild(message);
 
-      if (sunkMsg) {
+      // Display all sunk messages if any
+      for (const sunkMsg of sunkMsgs) {
         const message2 = document.createElement("p");
         message2.textContent = sunkMsg; // Display the sunk message
         fireResults.appendChild(message2);
@@ -550,13 +633,16 @@ async function analyzeHitOrMiss(target) {
       fireResults.appendChild(message);
     }
 
+    // Handle turns
     if (turnsArray.length > 0) {
       currentTurnIndex = Math.floor(Math.random() * turnsArray.length);
       currentTeamID = turnsArray[currentTurnIndex];
       currentTeam = teamsArray.find((team) => team.id === currentTeamID);
     } else {
       console.log(turnsArray.length);
+      menuHead.innerHTML = "";
       round++;
+      menuHead.textContent = `Round ${round}`;
       input.style = "display:none";
       action.style = "display:none";
       button.style = "display:none";
