@@ -25,10 +25,10 @@ colors = [
   "rgba(0, 0, 255, 0.6)", // Blue
   "rgba(0, 0, 0, 0.6)", // Black
   "rgba(255, 165, 0, 0.6)", // Orange
-  "rgba(255, 255, 0, 0.6)", // Yellow
   "rgba(0, 255, 0, 0.6)", // Green
   "rgba(255, 0, 0, 0.6)", // Red
-  "rgba(0, 255, 255, 0.6)", // Aqua
+  "rgba(255, 215, 0, 0.6)", // Gold
+  "rgba(255, 255, 0, 0.6)", // Yellow
 ];
 
 const arrayOfBoats = [
@@ -156,39 +156,56 @@ function createTeam() {
     let coordinatesArray = [];
     let row,
       col = 0;
+    let validCoordinates = false;
 
-    // Prompt for the coordinates of the current boat, replace prompt with click
-    const coordinatesInput = prompt(
-      `Enter the upper left coordinates for the ${boatType} (e.g., A1, B3, etc.)`
-    );
-
-    if (coordinatesInput) {
-      // Convert the input into an array of coordinates (assuming comma-separated inputs)
-      coordinatesArray = coordinatesInput.split(",").map((coord) => {
-        row =
-          coord.charAt(0).toUpperCase().charCodeAt(0) - "A".charCodeAt(0) + 1; // Convert letter to row
-        col = parseInt(coord.slice(1), 10); // Extract column number
-        return [row, col]; // Return as an array of [row, col]
-      });
-
-      const boatDirection = prompt(
-        'Enter "h" for horizontal, "v" for vertical'
+    while (!validCoordinates) {
+      // Prompt for the coordinates of the current boat
+      let coordinatesInput = prompt(
+        `Enter the upper left coordinates for the ${boatType} (${boatLength}).`
       );
-      // Store the coordinates in the boat's object
-      if (boatDirection == "h") {
-        for (i = 1; i < boatLength; i++) {
-          coordinatesArray.push([row, col + i]);
-        }
-      } else if (boatDirection == "v") {
-        for (i = 1; i < boatLength; i++) {
-          coordinatesArray.push([row + i, col]);
+
+      if (coordinatesInput) {
+        // Convert the input into an array of coordinates (assuming comma-separated inputs)
+        console.log(coordinatesInput);
+        coordinatesArray = coordinatesInput.split(",").map((coord) => {
+          row =
+            coord.charAt(0).toUpperCase().charCodeAt(0) - "A".charCodeAt(0) + 1; // Convert letter to row
+          col = parseInt(coord.slice(1), 10); // Extract column number
+          return [row, col]; // Return as an array of [row, col]
+        });
+
+        if (row >= 1 && row <= gridSize && col >= 1 && col <= gridSize) {
+          let boatDirection = prompt(
+            'Enter "h" for horizontal, "v" for vertical'
+          ).toUpperCase();
+
+          console.log(boatDirection);
+
+          // Loop until the user enters a valid direction
+          while (boatDirection !== "H" && boatDirection !== "V") {
+            // If the input is not "H" or "V", prompt the user again
+            boatDirection = prompt(
+              'Invalid input. Enter "h" for horizontal, "v" for vertical'
+            ).toUpperCase();
+          }
+
+          // Store the coordinates in the boat's object
+          if (boatDirection == "H") {
+            for (i = 1; i < boatLength; i++) {
+              coordinatesArray.push([row, col + i]);
+            }
+          } else if (boatDirection == "V") {
+            for (i = 1; i < boatLength; i++) {
+              coordinatesArray.push([row + i, col]);
+            }
+          }
+          validCoordinates = true;
+          team[boatType].coordinates = coordinatesArray;
+        } else {
+          console.error("Invalid coordinates input for " + boatType);
         }
       }
-      team[boatType].coordinates = coordinatesArray;
-    } else {
-      console.error("Invalid coordinates input for " + boatType);
     }
-
     // Move to the next ship
     whichShip++;
   }
@@ -235,6 +252,7 @@ function arrangeBoatsManually() {
       let displayTeam = document.createElement("p");
       displayTeam.textContent = `${i + 1}: ${teamsArray[i].name}`;
       displayTeam.style.marginRight = "10px"; // Space between name and button
+      displayTeam.style.color = teamsArray[i].color;
 
       // Create the edit button
       let editButton = document.createElement("button");
@@ -435,6 +453,7 @@ async function game() {
   addTable(); // Function to add the game table
   action.style = "display:inline";
   action.textContent = `Team ${currentTeam.name}, pick a target!`;
+  action.style.background = currentTeam.color;
 
   input.style = "display:inline";
   button.style = "display: inline";
@@ -457,6 +476,7 @@ async function game() {
         if (turnsArray.length > 0) {
           action.innerHTML = "";
           action.textContent = `Team ${currentTeam.name}, pick a target!`;
+          action.style.background = currentTeam.color;
 
           input.value = ""; // Clear the input after submission
         } else {
@@ -680,7 +700,24 @@ function score() {
   for (i = 0; i < numberOfTeams; i++) {
     const menu = document.getElementById("menu");
     const teamScore = document.createElement("p");
-    teamScore.textContent = teamsArray[i].name + ": " + teamsArray[i].score;
+
+    // Create the team name and make it bold
+    const teamName = document.createElement("span");
+    teamName.textContent = teamsArray[i].name;
+    teamName.style.fontWeight = "bold"; // Make the team name bold
+
+    teamScore.textContent =
+      ": Questions Right: " +
+      teamsArray[i].questionsRightTotal +
+      " Remaining Boat Scores: " +
+      (teamsArray[i].score - teamsArray[i].questionsRightTotal) +
+      " ________________________ " +
+      teamsArray[i].score;
+
+    teamScore.style.color = teamsArray[i].color;
+    // Insert the bold team name at the beginning
+    teamScore.insertBefore(teamName, teamScore.firstChild);
+
     menu.appendChild(teamScore);
   }
 }
