@@ -31,6 +31,8 @@ colors = [
   "rgba(255, 255, 0, 0.6)", // Yellow
 ];
 
+colorNameArray = ["Blue", "Black", "Orange", "Green", "Red", "Gold", "Yellow"];
+
 const arrayOfBoats = [
   "PTBoat",
   "Submarine",
@@ -100,12 +102,12 @@ function createTeam() {
   numberOfTeams++; // Increment the number of teams
   selectMode = true;
   // Prompt the user to enter a team name
-  let teamName = prompt("Enter the name of Team " + numberOfTeams);
+  let teamName = "Team " + colorNameArray[numberOfTeams - 1];
 
   // If the user doesn't enter a name, use a default one
-  if (!teamName) {
-    teamName = "Team " + numberOfTeams; // Default team name
-  }
+  // if (!teamName) {
+  //   teamName = "Team " + numberOfTeams; // Default team name
+  // }
 
   // Create a new team object
   let team = {
