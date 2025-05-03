@@ -191,20 +191,31 @@ function createTeam() {
             ).toUpperCase();
           }
 
-          // Store the coordinates in the boat's object
-          if (boatDirection == "H") {
-            for (i = 1; i < boatLength; i++) {
-              coordinatesArray.push([row, col + i]);
+          // Check if the full boat fits on the board
+          let fitsOnBoard =
+            (boatDirection === "H" && col + boatLength - 1 <= gridSize) ||
+            (boatDirection === "V" && row + boatLength - 1 <= gridSize);
+
+          if (fitsOnBoard) {
+            coordinatesArray = [[row, col]]; // Start fresh with only starting coordinate
+
+            if (boatDirection === "H") {
+              for (let i = 1; i < boatLength; i++) {
+                coordinatesArray.push([row, col + i]);
+              }
+            } else {
+              for (let i = 1; i < boatLength; i++) {
+                coordinatesArray.push([row + i, col]);
+              }
             }
-          } else if (boatDirection == "V") {
-            for (i = 1; i < boatLength; i++) {
-              coordinatesArray.push([row + i, col]);
-            }
+
+            validCoordinates = true;
+            team[boatType].coordinates = coordinatesArray;
+          } else {
+            alert("That ship would go off the board. Try again.");
           }
-          validCoordinates = true;
-          team[boatType].coordinates = coordinatesArray;
         } else {
-          console.error("Invalid coordinates input for " + boatType);
+          alert("Invalid starting coordinates. Try again.");
         }
       }
     }

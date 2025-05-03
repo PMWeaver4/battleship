@@ -24,7 +24,7 @@ header {
 }
 
 #menu {
-    width: 250px;              /* Fixed width for the menu */
+    width: 375px;              /* Fixed width for the menu */
     background-color: #f0f0f0; /* Background color for the menu */
     padding: 10px;             /* Padding around menu items */
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
